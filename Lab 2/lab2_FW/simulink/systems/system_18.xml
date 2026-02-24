@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<System>
+  <P Name="Location">[227, 345, 838, 789]</P>
+  <P Name="SIDHighWatermark">36</P>
+  <Block BlockType="Inport" Name="Img" SID="18::1">
+    <P Name="Position">[20, 101, 40, 119]</P>
+    <P Name="ZOrder">-1</P>
+    <PortProperties>
+      <Port Type="out" Index="1">
+        <P Name="PropagatedSignals">ImgNoise</P>
+      </Port>
+    </PortProperties>
+  </Block>
+  <Block BlockType="Demux" Name=" Demux " SID="18::35">
+    <PortCounts in="1" out="1"/>
+    <P Name="Position">[270, 230, 320, 270]</P>
+    <P Name="ZOrder">14</P>
+    <P Name="Outputs">1</P>
+  </Block>
+  <Block BlockType="S-Function" Name=" SFunction " SID="18::34">
+    <P Name="Tag">Stateflow S-Function 5</P>
+    <PortCounts in="1" out="2"/>
+    <P Name="Position">[180, 100, 230, 160]</P>
+    <P Name="ZOrder">13</P>
+    <P Name="FunctionName">sf_sfun</P>
+    <P Name="PortCounts">[1 2]</P>
+    <P Name="SFunctionDeploymentMode">off</P>
+    <P Name="EnableBusSupport">on</P>
+    <P Name="SFcnIsStateOwnerBlock">off</P>
+    <PortProperties>
+      <Port Type="out" Index="2">
+        <P Name="Name">ImgFiltered</P>
+      </Port>
+    </PortProperties>
+  </Block>
+  <Block BlockType="Terminator" Name=" Terminator " SID="18::36">
+    <P Name="Position">[460, 241, 480, 259]</P>
+    <P Name="ZOrder">15</P>
+  </Block>
+  <Block BlockType="Outport" Name="ImgFiltered" SID="18::19">
+    <P Name="Position">[460, 101, 480, 119]</P>
+    <P Name="ZOrder">-6</P>
+  </Block>
+  <Line>
+    <P Name="ZOrder">18</P>
+    <P Name="Src">18::1#out:1</P>
+    <P Name="Dst">18::34#in:1</P>
+  </Line>
+  <Line>
+    <P Name="Name">ImgFiltered</P>
+    <P Name="ZOrder">19</P>
+    <P Name="Labels">[0, 0]</P>
+    <P Name="Src">18::34#out:2</P>
+    <P Name="Dst">18::19#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">20</P>
+    <P Name="Src">18::35#out:1</P>
+    <P Name="Dst">18::36#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">21</P>
+    <P Name="Src">18::34#out:1</P>
+    <P Name="Dst">18::35#in:1</P>
+  </Line>
+</System>

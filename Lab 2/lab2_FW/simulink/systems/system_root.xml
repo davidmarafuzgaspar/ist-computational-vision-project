@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<System>
+  <P Name="Location">[-1, -8, 1921, 1041]</P>
+  <P Name="Open">on</P>
+  <P Name="ZoomFactor">223</P>
+  <P Name="ReportName">simulink-default.rpt</P>
+  <P Name="SIDHighWatermark">29</P>
+  <Block BlockType="SubSystem" Name="Filter" SID="18">
+    <PortCounts in="1" out="1"/>
+    <P Name="Position">[655, 344, 745, 396]</P>
+    <P Name="ZOrder">379</P>
+    <P Name="LibraryVersion">1.32</P>
+    <P Name="ErrorFcn">Stateflow.Translate.translate</P>
+    <P Name="PermitHierarchicalResolution">ExplicitOnly</P>
+    <P Name="TreatAsAtomicUnit">on</P>
+    <P Name="SFBlockType">MATLAB Function</P>
+    <PortProperties>
+      <Port Type="out" Index="1">
+        <P Name="PropagatedSignals">ImgFiltered</P>
+      </Port>
+    </PortProperties>
+    <System Ref="system_18"/>
+  </Block>
+  <Block BlockType="Reference" Name="Filtered Image" SID="23">
+    <PortCounts in="1"/>
+    <P Name="Position">[810, 346, 915, 394]</P>
+    <P Name="ZOrder">383</P>
+    <P Name="LibraryVersion">6.0</P>
+    <P Name="SourceBlock">visionsinks/To Video Display</P>
+    <P Name="SourceType">To Video Display</P>
+    <InstanceData>
+      <P Name="MultithreadedSim">auto</P>
+      <P Name="windowSizeMode">Normal</P>
+      <P Name="openAtMdlStart">on</P>
+      <P Name="fullScreen">off</P>
+      <P Name="videoWindowX">815</P>
+      <P Name="videoWindowY">-1455</P>
+      <P Name="saveWindowSize">off</P>
+      <P Name="videoWindowWidth">854</P>
+      <P Name="videoWindowHeight">872</P>
+      <P Name="inputColorFormat">RGB</P>
+      <P Name="inputType">Obsolete</P>
+      <P Name="imagePorts">One multidimensional signal</P>
+      <P Name="OutputDevice">On-screen video monitor</P>
+      <P Name="dataOrg">Column-major</P>
+      <P Name="isWindowOpen">on</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="Image Loading" SID="29">
+    <P Name="Tag">vipblks_nd</P>
+    <PortCounts out="1"/>
+    <P Name="Position">[150, 344, 250, 396]</P>
+    <P Name="ZOrder">387</P>
+    <P Name="LibraryVersion">9.0</P>
+    <P Name="SourceBlock">visionsources/Image From File</P>
+    <P Name="SourceType">Image From File</P>
+    <InstanceData>
+      <P Name="RTWMemSecFuncInitTerm">Inherit from model</P>
+      <P Name="RTWMemSecFuncExecute">Inherit from model</P>
+      <P Name="RTWMemSecDataConstants">Inherit from model</P>
+      <P Name="RTWMemSecDataInternal">Inherit from model</P>
+      <P Name="RTWMemSecDataParameters">Inherit from model</P>
+      <P Name="ContentPreviewEnabled">on</P>
+      <P Name="FileName">car1.jpg</P>
+      <P Name="Ts">0.01</P>
+      <P Name="imagePorts">One multidimensional signal</P>
+      <P Name="OutPortLabels">R|G|B</P>
+      <P Name="ImageDataType">double</P>
+      <P Name="sdImageDataType">uint(8)</P>
+      <P Name="Signed">on</P>
+      <P Name="WordLength">16</P>
+      <P Name="FractionLengthMode">User-defined</P>
+      <P Name="FractionLength">15</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="SubSystem" Name="Image Noise" SID="9">
+    <PortCounts in="1" out="1"/>
+    <P Name="Position">[490, 346, 580, 394]</P>
+    <P Name="ZOrder">377</P>
+    <P Name="ErrorFcn">Stateflow.Translate.translate</P>
+    <P Name="PermitHierarchicalResolution">ExplicitOnly</P>
+    <P Name="TreatAsAtomicUnit">on</P>
+    <P Name="SFBlockType">MATLAB Function</P>
+    <P Name="ContentPreviewEnabled">on</P>
+    <PortProperties>
+      <Port Type="out" Index="1">
+        <P Name="PropagatedSignals">ImgNoise</P>
+      </Port>
+    </PortProperties>
+    <System Ref="system_9"/>
+  </Block>
+  <Block BlockType="Reference" Name="Original Image" SID="26">
+    <PortCounts in="1"/>
+    <P Name="Position">[810, 436, 915, 484]</P>
+    <P Name="ZOrder">385</P>
+    <P Name="LibraryVersion">6.0</P>
+    <P Name="SourceBlock">visionsinks/To Video Display</P>
+    <P Name="SourceType">To Video Display</P>
+    <InstanceData>
+      <P Name="MultithreadedSim">auto</P>
+      <P Name="windowSizeMode">Normal</P>
+      <P Name="openAtMdlStart">on</P>
+      <P Name="fullScreen">off</P>
+      <P Name="videoWindowX">1713</P>
+      <P Name="videoWindowY">-1322</P>
+      <P Name="saveWindowSize">off</P>
+      <P Name="videoWindowWidth">854</P>
+      <P Name="videoWindowHeight">872</P>
+      <P Name="inputColorFormat">RGB</P>
+      <P Name="inputType">Obsolete</P>
+      <P Name="imagePorts">One multidimensional signal</P>
+      <P Name="OutputDevice">On-screen video monitor</P>
+      <P Name="dataOrg">Column-major</P>
+      <P Name="isWindowOpen">on</P>
+    </InstanceData>
+  </Block>
+  <Block BlockType="Reference" Name="RGB to Grayscale" SID="2">
+    <PortCounts in="1" out="1"/>
+    <P Name="Position">[320, 341, 420, 399]</P>
+    <P Name="ZOrder">373</P>
+    <P Name="LibraryVersion">8.0</P>
+    <P Name="SourceBlock">visionconversions/Color Space
+ Conversion</P>
+    <P Name="SourceType">Color Space Conversion</P>
+    <InstanceData>
+      <P Name="MultithreadedSim">auto</P>
+      <P Name="conversion">Obsolete</P>
+      <P Name="conversionActive">R&apos;G&apos;B&apos; to intensity</P>
+      <P Name="wp_str">D65</P>
+      <P Name="rec">Rec. 601 (SDTV)</P>
+      <P Name="sys">1125/60/2:1</P>
+      <P Name="imagePorts">One multidimensional signal</P>
+    </InstanceData>
+  </Block>
+  <Line>
+    <P Name="ZOrder">35</P>
+    <P Name="Src">29#out:1</P>
+    <P Name="Dst">2#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">7</P>
+    <P Name="Src">2#out:1</P>
+    <P Name="Dst">9#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">15</P>
+    <P Name="Src">9#out:1</P>
+    <P Name="Points">[26, 0]</P>
+    <Branch>
+      <P Name="ZOrder">37</P>
+      <P Name="Points">[0, 90]</P>
+      <P Name="Dst">26#in:1</P>
+    </Branch>
+    <Branch>
+      <P Name="ZOrder">36</P>
+      <P Name="Dst">18#in:1</P>
+    </Branch>
+  </Line>
+  <Line>
+    <P Name="ZOrder">21</P>
+    <P Name="Src">18#out:1</P>
+    <P Name="Dst">23#in:1</P>
+  </Line>
+  <Annotation SID="4">
+    <P Name="Name">Input Image</P>
+    <P Name="Position">[134, 315, 272, 429]</P>
+    <P Name="InternalMargins">[0, 0, 0, 0]</P>
+    <P Name="FixedHeight">on</P>
+    <P Name="FixedWidth">on</P>
+    <P Name="ForegroundColor">[0.901961, 0.901961, 1.000000]</P>
+    <P Name="BackgroundColor">[0.901961, 0.901961, 1.000000]</P>
+    <P Name="DropShadow">on</P>
+    <P Name="AnnotationType">area_annotation</P>
+    <P Name="ZOrder">322</P>
+    <P Name="FontSize">12</P>
+  </Annotation>
+  <Annotation SID="11">
+    <P Name="Name">CS conversion </P>
+    <P Name="Position">[299, 315, 437, 429]</P>
+    <P Name="InternalMargins">[0, 0, 0, 0]</P>
+    <P Name="FixedHeight">on</P>
+    <P Name="FixedWidth">on</P>
+    <P Name="ForegroundColor">[0.901961, 0.960784, 1.000000]</P>
+    <P Name="BackgroundColor">[0.901961, 0.960784, 1.000000]</P>
+    <P Name="DropShadow">on</P>
+    <P Name="AnnotationType">area_annotation</P>
+    <P Name="ZOrder">323</P>
+    <P Name="FontSize">12</P>
+  </Annotation>
+  <Annotation SID="15">
+    <P Name="Name">Noise</P>
+    <P Name="Position">[464, 315, 602, 429]</P>
+    <P Name="InternalMargins">[0, 0, 0, 0]</P>
+    <P Name="FixedHeight">on</P>
+    <P Name="FixedWidth">on</P>
+    <P Name="ForegroundColor">[0.956863, 0.980392, 0.921569]</P>
+    <P Name="BackgroundColor">[0.956863, 0.980392, 0.921569]</P>
+    <P Name="DropShadow">on</P>
+    <P Name="AnnotationType">area_annotation</P>
+    <P Name="ZOrder">324</P>
+    <P Name="FontSize">12</P>
+  </Annotation>
+  <Annotation SID="17">
+    <P Name="Name">Filters</P>
+    <P Name="Position">[629, 315, 767, 429]</P>
+    <P Name="InternalMargins">[0, 0, 0, 0]</P>
+    <P Name="FixedHeight">on</P>
+    <P Name="FixedWidth">on</P>
+    <P Name="ForegroundColor">[0.992157, 0.937255, 0.913725]</P>
+    <P Name="BackgroundColor">[0.992157, 0.937255, 0.913725]</P>
+    <P Name="DropShadow">on</P>
+    <P Name="AnnotationType">area_annotation</P>
+    <P Name="ZOrder">325</P>
+    <P Name="FontSize">12</P>
+  </Annotation>
+  <Annotation SID="22">
+    <P Name="Name">Visualization</P>
+    <P Name="Position">[794, 315, 932, 509]</P>
+    <P Name="InternalMargins">[0, 0, 0, 0]</P>
+    <P Name="FixedHeight">on</P>
+    <P Name="FixedWidth">on</P>
+    <P Name="ForegroundColor">[0.996078, 0.968627, 0.909804]</P>
+    <P Name="BackgroundColor">[0.996078, 0.968627, 0.909804]</P>
+    <P Name="DropShadow">on</P>
+    <P Name="AnnotationType">area_annotation</P>
+    <P Name="ZOrder">326</P>
+    <P Name="FontSize">12</P>
+  </Annotation>
+</System>
