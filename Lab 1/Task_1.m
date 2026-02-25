@@ -14,4 +14,4 @@
 img = imread('./Data/bottlecaps.jpg');
 
 % Display the original image
-imshow(img_rgb);
+imshow(img);

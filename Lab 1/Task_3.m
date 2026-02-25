@@ -10,8 +10,8 @@
 
 %% Task 3
 % Load the bottlecaps image and convert to grayscale
-img_rgb = imread('./Data/bottlecaps.jpg');
-img_gray = rgb2gray(img_rgb);
+img = imread('./Data/bottlecaps.jpg');
+img_gray = rgb2gray(img);
 
 % Create a figure for comparison
 figure('Name', 'Task 3: Histogram Analysis');

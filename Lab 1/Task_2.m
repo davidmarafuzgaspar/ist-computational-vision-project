@@ -10,12 +10,12 @@
 
 %% Task 2
 % Load the original image
-img_rgb = imread('./Data/bottlecaps.jpg');
+img = imread('./Data/bottlecaps.jpg');
 
 % Perform conversions
-img_hsv = rgb2hsv(img_rgb);
-img_ycbcr = rgb2ycbcr(img_rgb);
-img_gray = rgb2gray(img_rgb);
+img_hsv = rgb2hsv(img);
+img_ycbcr = rgb2ycbcr(img);
+img_gray = rgb2gray(img);
 
 % Save the new images
 imwrite(img_hsv, './Data/bottlecaps_hsv.jpg');
