@@ -1,4 +1,4 @@
-% % % % % % % % % % % % % % % % %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico 
 % Computational Vision - Lab 1
 % 
@@ -6,7 +6,7 @@
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
 %
-% % % % % % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Task 1
 
