@@ -14,33 +14,19 @@ img2_gray = rgb2gray(img2);
 
 %% Direct Harris Corner Detection (noisy result)
 corners = detectHarrisFeatures(img2_gray);
-
 figure;
-imshow(img2);
-hold on;
+imshow(img2); hold on;
 plot(corners.selectStrongest(200));
 title('Harris Corners - Direct (noisy)');
 
-%% Preprocessing to reduce background noise
+%% Preprocessing - Gaussian smoothing only
+img2_smooth = imfilter(img2_gray, fspecial('gaussian', 5, 3));
 
-% Gaussian smoothing
-img2_smooth = imfilter(img2_gray, fspecial('gaussian', 5, 0.1));
-
-% Binarize to isolate objects from background
-img2_bin = imbinarize(img2_smooth);
-
-% Apply binary mask to grayscale image
-img2_masked = img2_gray;
-img2_masked(~img2_bin) = 0;
-
-%% Harris Corner Detection on preprocessed image
-corners_clean = detectHarrisFeatures(img2_masked);
-
-% Extract corner locations from the object
+%% Harris Corner Detection on smoothed image
+corners_clean = detectHarrisFeatures(img2_smooth);
 pts = corners_clean.Location;
 
 figure;
-imshow(img2);
-hold on;
+imshow(img2); hold on;
 plot(pts(:,1), pts(:,2), 'r+', 'MarkerSize', 10, 'LineWidth', 1.5);
-title('Harris Corners - After Preprocessing');
+title('Harris Corners - After Gaussian Smoothing');
