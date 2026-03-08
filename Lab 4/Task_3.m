@@ -1,3 +1,14 @@
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 4
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+%
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
+%% Task 3 
 % 1. Load the image (Ensure it is in your working directory)
 img_original = imread('./Data/pillsetc.png');
 
