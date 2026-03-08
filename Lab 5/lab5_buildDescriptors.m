@@ -18,7 +18,7 @@ function [descripRho, descripSqu, descripTri, featuresRho, featuresSqu, features
     
     % Add image folder to current path
     restoredefaultpath
-    addpath(cd, 'datasetImages');
+    addpath(cd, './Data/datasetImages');
 
     for class = 1 : nClasses
         if class == 1
@@ -90,7 +90,7 @@ function [descripRho, descripSqu, descripTri, featuresRho, featuresSqu, features
     featuresRho = descripRho.Features;
     featuresSqu = descripSqu.Features;
     featuresTri = descripTri.Features;
-    save('featuresRho', 'featuresRho')
-    save('featuresSqu', 'featuresSqu')
-    save('featuresTri', 'featuresTri')
+    save('./Data/output/featuresRho', 'featuresRho')
+    save('./Data/output/featuresSqu', 'featuresSqu')
+    save('./Data/output/featuresTri', 'featuresTri')
 end
