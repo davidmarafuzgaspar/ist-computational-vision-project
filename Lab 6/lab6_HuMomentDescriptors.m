@@ -21,7 +21,7 @@ c3 = 'tri_build';
 
 %% step 2: evaluation of the descriptors
 % Read images from a directory
-d = dir(['datasetImages\*.' 'jpg']);
+d = dir(['./Data/datasetImages\*.' 'jpg']);
 
 % Inicialize the descriptor matrix:
 dm = zeros(size(d,1),Number_of_descriptors);

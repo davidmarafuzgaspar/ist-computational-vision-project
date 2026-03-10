@@ -1,7 +1,7 @@
 %% Task 2 - Online Classification (initialization)
 clear, clc, clf, close all
 restoredefaultpath
-addpath(cd, 'datasetImages');
+addpath(cd, './Data/datasetImages');
 
 % Calls function for computing the Hu Moments descriptors
 lab6_HuMomentDescriptors(0);
