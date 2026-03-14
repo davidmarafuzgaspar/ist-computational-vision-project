@@ -1,4 +1,0 @@
-LIBRARY lab6_OnlineClassifier_sfun.mexw64
-EXPORTS
-mexFunction
-mexfilerequiredapiversion
