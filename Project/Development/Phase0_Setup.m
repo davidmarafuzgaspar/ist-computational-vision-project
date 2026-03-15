@@ -28,7 +28,7 @@ filenames = {
 };
 
 % Ground truth: 0 = clear, 1 = obstructed
-labels = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1];
+labels = [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1];
 
 % Figure titles
 descriptions = {
