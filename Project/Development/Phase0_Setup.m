@@ -19,9 +19,6 @@ clear; clc; close all;
 % characterisation informs subsequent design decisions regarding
 % preprocessing and segmentation strategies.
 
-%% ----------------------------------------------------------
-%  SECTION 1: LOAD ALL IMAGES
-% -----------------------------------------------------------
 filenames = {
 './Data/cortada11.png',   ... % 1  - OBSTRUCTED
 './Data/Frame1253.jpg',   ... % 2  - clear
@@ -89,9 +86,6 @@ fprintf('Obstructed:    %d\n', sum(labels == 1));
 % lighting conditions, track geometry, and obstruction type — and serves
 % as the qualitative baseline reference for the remainder of the project.
 
-%% ----------------------------------------------------------
-%  SECTION 2: DISPLAY ALL IMAGES (RGB)
-% -----------------------------------------------------------
 figure('Name', 'Figure 1 - Full Dataset Overview', ...
     'NumberTitle', 'off', ...
     'Position', [0, 0, 1500, 900]);
@@ -115,9 +109,7 @@ end
 sgtitle('Figure 1 — Full Dataset Overview  (Green = Clear  |  Red = Obstructed)', ...
     'FontSize', 13, 'FontWeight', 'bold');
 
-%% ----------------------------------------------------------
-%  SECTION 4: SAVE WORKSPACE (Remove for report)
-% -----------------------------------------------------------
+%% Remove for the actual report
 save('./Output/workspace_phase0.mat', ...
     'images', 'filenames', 'labels', 'descriptions', 'N');
 fprintf('\nWorkspace saved to ./Output/workspace_phase0.mat\n');
