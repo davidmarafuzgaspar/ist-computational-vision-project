@@ -3,7 +3,7 @@
 % =========================================================================
 
 %% --- Load all images ---
-datasetPath = './Data/Dataset - B2/';
+datasetPath = '../Data/Dataset - B2/';
 imgFiles = dir(fullfile(datasetPath, '*.jpg'));
 if isempty(imgFiles)
     imgFiles = dir(fullfile(datasetPath, '*.png'));
@@ -23,10 +23,10 @@ for i = 1:numImages
     [imgH, imgW, ~] = size(imgRGB);
 
     % ROI trapezoid
-    bottomLeft  = [round(0.10*imgW),  imgH              ];
-    bottomRight = [round(0.90*imgW),  imgH              ];
-    topLeft     = [round(0.35*imgW),  round(0.40*imgH)  ];
-    topRight    = [round(0.65*imgW),  round(0.40*imgH)  ];
+    bottomLeft  = [round(0.05*imgW),  imgH              ];
+    bottomRight = [round(0.95*imgW),  imgH              ];
+    topLeft     = [round(0.30*imgW),  round(0.25*imgH)  ];
+    topRight    = [round(0.70*imgW),  round(0.25*imgH)  ];
     polyX = [bottomLeft(1), topLeft(1), topRight(1), bottomRight(1)];
     polyY = [bottomLeft(2), topLeft(2), topRight(2), bottomRight(2)];
 
