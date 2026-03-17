@@ -100,7 +100,7 @@ end
 
 % Standard deviation of the Gaussian kernel.
 % Higher values suppress more noise but risk blurring genuine rail edges.
-gauss_sigma = 1.2;
+gauss_sigma = 1.25;
 
 images_smooth = cell(N, 1);
 for i = 1:N
