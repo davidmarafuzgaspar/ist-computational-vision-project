@@ -20,46 +20,43 @@ clear; clc; close all;
 % preprocessing and segmentation strategies.
 
 filenames = {
-'./Data/cortada11.png',   ... % 1  - OBSTRUCTED
-'./Data/Frame1253.jpg',   ... % 2  - clear
-'./Data/Frame1291.jpg',   ... % 3  - clear
-'./Data/Frame1532.jpg',   ... % 4  - clear
-'./Data/Frame1603.jpg',   ... % 5  - clear
-'./Data/Frame1616.jpg',   ... % 6  - OBSTRUCTED
-'./Data/image00756.jpg',  ... % 7  - clear
-'./Data/image02293.jpg',  ... % 8  - clear
-'./Data/image04054.jpg',  ... % 9  - OBSTRUCTED
-'./Data/image04925.jpg',  ... % 10 - clear
-'./Data/image06026.jpg',  ... % 11 - clear
-'./Data/j30.jpg',         ... % 12 - OBSTRUCTED
-'./Data/l20.jpg',         ... % 13 - OBSTRUCTED
-'./Data/l23.jpg',         ... % 14 - OBSTRUCTED
-'./Data/p8.jpg',          ... % 15 - OBSTRUCTED
+    './Data/cortada11.png',   ... % 1  - OBSTRUCTED (rocks)
+    './Data/Frame1253.jpg',   ... % 2  - clear
+    './Data/Frame1291.jpg',   ... % 3  - clear
+    './Data/Frame1532.jpg',   ... % 4  - clear (curved)
+    './Data/Frame1603.jpg',   ... % 5  - clear (curved)
+    './Data/Frame1616.jpg',   ... % 6  - OBSTRUCTED (rocks)
+    './Data/image00756.jpg',  ... % 7  - clear (station)
+    './Data/image02293.jpg',  ... % 8  - clear (railroad crossing)
+    './Data/image04054.jpg',  ... % 9  - OBSTRUCTED (rocks)
+    './Data/image04925.jpg',  ... % 10 - clear (dark/tunnel)
+    './Data/image06026.jpg',  ... % 11 - clear (tunnel exit)
+    './Data/j30.jpg',         ... % 12 - OBSTRUCTED (rocks)
+    './Data/l20.jpg',         ... % 13 - OBSTRUCTED (vegetation)
+    './Data/l23.jpg',         ... % 14 - OBSTRUCTED (vegetation)
+    './Data/p8.jpg',          ... % 15 - OBSTRUCTED (rocks beside track)
 };
 
-% Binary ground-truth: 0 = clear, 1 = obstructed.
-% Assigned by manual visual inspection; this will be used as reference
-% for performance evaluation in later phases.
+% Ground truth: 0 = clear, 1 = obstructed
 labels = [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1];
 
-% Scene descriptions used for figure annotations
-% and qualitative analysis of results.
+% Figure titles
 descriptions = {
-'Obstructed - Rocks',
-'Clear - Straight',
-'Clear - Straight',
-'Clear - Curved',
-'Clear - Curved',
-'Obstructed - Rocks',
-'Clear - Station',
-'Clear - Railroad crossing',
-'Obstructed - Rocks',
-'Clear - Dark tunnel',
-'Clear - Tunnel exit',
-'Obstructed - Rocks',
-'Obstructed - Vegetation',
-'Obstructed - Vegetation',
-'Obstructed - Rocks beside track',
+    'Obstructed - rocks',
+    'Clear - straight',
+    'Clear - straight',
+    'Clear - curved',
+    'Clear - curved',
+    'Obstructed - rocks',
+    'Clear - station',
+    'Clear - railroad crossing',
+    'Obstructed - rocks',
+    'Clear - dark tunnel',
+    'Clear - tunnel exit',
+    'Obstructed - rocks',
+    'Obstructed - vegetation',
+    'Obstructed - vegetation',
+    'Obstructed - rocks beside track',
 };
 
 N = length(filenames);

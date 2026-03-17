@@ -3,7 +3,7 @@
 % =========================================================================
 
 %% --- Load image ---
-datasetPath = './Data/Dataset - B2/';
+datasetPath = '../Data/Dataset - B2/';
 imgFiles = dir(fullfile(datasetPath, '*.jpg'));
 if isempty(imgFiles)
     imgFiles = dir(fullfile(datasetPath, '*.png'));
