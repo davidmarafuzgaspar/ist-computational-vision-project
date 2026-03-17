@@ -1,44 +1,78 @@
 clear, clc, close all
-%% Visualize Features
-% Choose properties to visualize
-properties = ["Perimeter", "Area"];
-[propsTable, XTrain, YTrain, XTest, YTest] = lab7_buildTable(properties);
 
+%% TASK 1: Perimeter vs Area
+properties1 = ["Perimeter", "Area"];
+[propsTable1, XTrain1, YTrain1, XTest1, YTest1] = lab7_buildTable(properties1);
 
-%% TASK 1: Build KNN Model
-% Build model from training data (XTrain, YTrain)
+% Build and Predict
+knnModel1 = fitcknn(XTrain1, YTrain1, 'NumNeighbors', 3);
+predictionsKNN1 = predict(knnModel1, XTest1);
 
+% Plot Confusion Matrix
+figure(1); 
+confusionchart(YTest1, predictionsKNN1, 'Title', 'Confusion Matrix: Perimeter vs Area');
 
-% Predict model for testing data (XTest)
-predictionsKNN = zeros(size(YTest)); %% CHANGE THIS!!!
+% Visualize Feature Influence
+figure(2);
+gscatter(propsTable1.(properties1(1)), propsTable1.(properties1(2)), propsTable1.Class)
+xlabel(properties1(1)), ylabel(properties1(2))
+title('Feature Space: Perimeter vs Area')
 
-% Compute accuracy
-MatchesKNN = (string(YTest) == string(predictionsKNN));
-fprintf('Prediction results: %s\n', num2str(MatchesKNN'))
+%% Task 2: Circularity vs Eccentricity
+properties2 = ["Circularity", "Eccentricity"];
+[propsTable2, XTrain2, YTrain2, XTest2, YTest2] = lab7_buildTable(properties2);
 
-% Obtain the confusion matrix
+% Build and Predict
+knnModel2 = fitcknn(XTrain2, YTrain2, 'NumNeighbors', 3);
+predictionsKNN2 = predict(knnModel2, XTest2);
 
-return
-%% TASK 2: Feature Influence in Classification Results
-% Properties to visualize
-prop1 = 1;  % Number of property 1
-prop2 = 2;  % Number of property 2
-subplot(2,2,2), gscatter(propsTable.(properties(prop1)), propsTable.(properties(prop2)),propsTable.Class)
-xlabel(properties(prop1)), ylabel(properties(prop2))
+% Plot Confusion Matrix
+figure(3); 
+confusionchart(YTest2, predictionsKNN2, 'Title', 'Confusion Matrix: Circularity vs Area');
 
+% Visualize Feature Influence
+figure(4);
+gscatter(propsTable2.(properties2(1)), propsTable2.(properties2(2)), propsTable2.Class)
+xlabel(properties2(1)), ylabel(properties2(2))
+title('Feature Space: Circularity vs Area')
 
-%% TASK 3: Build NN Model
-% Build model from training data (XTrain, YTrain)
+%% TASK 3: Build NN Model with Perimeter vs Area
+% 1. Build the model
+% 'LayerSizes' defines the architecture: [10] is one layer, [10 10] is two.
+nnModel = fitcnet(XTrain1, YTrain1, ...
+    'LayerSizes', [100 100], ... 
+    'Activation', 'relu', ...
+    'Standardize', true);
 
+% 2. Predict model for testing data (XTest)
+predictionsNN = predict(nnModel, XTest1);
 
-% Predict model for testing data (XTest)
-predictionsNN = zeros(size(YTest)); %% CHANGE THIS!!!
+% 3. Compute accuracy
+MatchesNN = (string(YTest1) == string(predictionsNN));
+accuracyNN = mean(MatchesNN);
+fprintf('NN (Perimeter vs Area) Accuracy: %.2f%%\n', accuracyNN * 100);
 
-% Compute accuracy
-MatchesNN = (string(YTest) == string(predictionsNN));
-fprintf('Prediction results: %s\n', num2str(MatchesNN'))
+% Plot the confusion matrix to see the 100% progress
+figure;
+confusionchart(YTest1, predictionsNN, 'Title', 'Confusion Matrix: Neural Network');
 
+%% TASK 3: Build NN Model with Circularity vs Area
+% 1. Build the model
+% 'LayerSizes' defines the architecture: [10] is one layer, [10 10] is two.
+nnModel = fitcnet(XTrain2, YTrain2, ...
+    'LayerSizes', [100 100], ... 
+    'Activation', 'relu', ...
+    'Standardize', true);
 
-% Obtain the confusion matrix
+% 2. Predict model for testing data (XTest)
+predictionsNN = predict(nnModel, XTest1);
 
+% 3. Compute accuracy
+MatchesNN = (string(YTest2) == string(predictionsNN));
+accuracyNN = mean(MatchesNN);
+fprintf('NN (Circularity vs Eccentricity) Accuracy: %.2f%%\n', accuracyNN * 100);
+
+% Plot the confusion matrix to see the 100% progress
+figure;
+confusionchart(YTest2, predictionsNN, 'Title', 'Confusion Matrix: Neural Network');
 

@@ -1,6 +1,6 @@
 function [propsTable, XTrain, YTrain, XTest, YTest] = lab7_buildTable(Props)
 % Adds dataset folder to path and declare global variables
-addpath('images');
+addpath('Data');
 
 % Removes missing properties (the commented ones)
 Props = rmmissing(Props);
