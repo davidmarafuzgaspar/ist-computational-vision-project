@@ -1,7 +1,7 @@
 % ============================================================
 %  PROJECT 1 - TOPIC B: RAILWAY INSPECTION
 %
-%  PHASE 7 - Indirect Obstacle Detection (p8.jpg test)
+%  PHASE 7 - Indirect Obstacle Detection
 %
 %  Authors:
 %   - David Marafuz Gaspar - 106541
@@ -13,254 +13,287 @@ load('./Output/workspace_phase6.mat');
 load('./Output/ground_truth.mat');
 
 %% ----------------------------------------------------------
-%  SECTION 1: LOAD p8.jpg AND EXTRACT GROUND TRUTH
+%  SECTION 1: SELECT IMAGES AND EXTRACT GROUND TRUTH
 % -----------------------------------------------------------
 
-% Find p8.jpg index in filenames
-target_name = 'p8.jpg';
-img_idx = [];
-for i = 1:N
-    [~, name, ext] = fileparts(filenames{i});
-    if strcmp([name ext], target_name)
-        img_idx = i;
-        break;
+target_names = {'Frame1253.jpg', 'Frame1291.jpg', 'Frame1532.jpg', 'Frame1603.jpg', 'image00756.jpg', 'image02293.jpg', 'image06026.jpg', 'p8.jpg'};  % <-- update as needed
+
+num_targets  = length(target_names);
+img_indices  = zeros(num_targets, 1);
+pts_left_all  = cell(num_targets, 1);
+pts_right_all = cell(num_targets, 1);
+imgs          = cell(num_targets, 1);
+img_sizes     = zeros(num_targets, 2);
+
+for t = 1:num_targets
+    target_name = target_names{t};
+
+    img_idx = [];
+    for i = 1:N
+        [~, name, ext] = fileparts(filenames{i});
+        if strcmp([name ext], target_name)
+            img_idx = i;
+            break;
+        end
     end
-end
-fprintf('p8.jpg found at index %d\n', img_idx);
 
-% Find ground truth entry for p8.jpg
-gt_idx = [];
-for j = 1:length(gt)
-    if strcmp(gt(j).filename, target_name)
-        gt_idx = j;
-        break;
+    gt_idx = [];
+    for j = 1:length(gt)
+        if strcmp(gt(j).filename, target_name)
+            gt_idx = j;
+            break;
+        end
     end
+
+    if isempty(img_idx) || isempty(gt_idx)
+        warning('Skipping %s — image or ground truth not found.', target_name);
+        continue;
+    end
+
+    img_indices(t)    = img_idx;
+    pts_left_all{t}   = gt(gt_idx).left;
+    pts_right_all{t}  = gt(gt_idx).right;
+    imgs{t}           = images{img_idx};
+    [h, w, ~]         = size(images{img_idx});
+    img_sizes(t, :)   = [h, w];
+
+    fprintf('[%d] %s | img_idx=%d | L=%d pts | R=%d pts\n', ...
+        t, target_name, img_idx, ...
+        size(pts_left_all{t},  1), ...
+        size(pts_right_all{t}, 1));
 end
 
-% Extract ground truth rail points
-pts_left  = gt(gt_idx).left;   % Nx2: [x, y]
-pts_right = gt(gt_idx).right;  % Nx2: [x, y]
-
-fprintf('Left rail:  %d points\n', size(pts_left,  1));
-fprintf('Right rail: %d points\n', size(pts_right, 1));
-
-img     = images{img_idx};
-[h, w, ~] = size(img);
-
 %% ----------------------------------------------------------
-%  SECTION 2: FIT POLYNOMIAL TO CURVED RAIL GROUND TRUTH
+%  SECTION 2: POLYNOMIAL FIT + REGION SPLIT + SLIC + EULER
 % -----------------------------------------------------------
 
-% Since the rails are curved, a 2nd degree polynomial is fitted
-% (y as a function of x) to better capture the curvature
-poly_degree = 2;
+poly_degree    = 2;
+num_superpixels = 100;
+k_clusters     = 3;
+se_region      = strel('square', 30);
 
-% Left rail: fit x = f(y) since rails run mostly vertically
-p_left  = polyfit(pts_left(:,2),  pts_left(:,1),  poly_degree);
-p_right = polyfit(pts_right(:,2), pts_right(:,1), poly_degree);
+euler_results    = zeros(num_targets, 3);
+indirect_flags   = false(num_targets, 1);
+surrounding_all  = cell(num_targets, 1);
+regions_all      = cell(num_targets, 3);  % {t, 1/2/3} = left/mid/right refined
 
-% Evaluate fitted curves over full image height
-y_range   = (1:h)';
-x_left    = polyval(p_left,  y_range);
-x_right   = polyval(p_right, y_range);
+for t = 1:num_targets
 
-% --- Figure: Rail fit verification ---
-figure('Name', 'Figure 21 - Rail Polynomial Fit on p8.jpg', ...
-    'NumberTitle', 'off', 'Position', [0, 0, 800, 600]);
+    if img_indices(t) == 0[sp_labels, num_sp] = superpixels(img_lab, num_superpixels, ...
+        'Compactness', 20, 'IsInputLab', true);
+        continue;
+    end
 
-imshow(img); hold on;
-plot(pts_left(:,1),  pts_left(:,2),  'r.', 'MarkerSize', 15);
-plot(pts_right(:,1), pts_right(:,2), 'g.', 'MarkerSize', 15);
-plot(x_left,  y_range, 'r-', 'LineWidth', 2);
-plot(x_right, y_range, 'g-', 'LineWidth', 2);
-legend('GT Left pts', 'GT Right pts', 'Fitted Left', 'Fitted Right', ...
-    'Location', 'northwest');
-title('Figure 21 — Polynomial Rail Fit on p8.jpg', 'FontSize', 11);
-hold off;
+    img      = imgs{t};
+    h        = img_sizes(t, 1);
+    w        = img_sizes(t, 2);
+    i        = img_indices(t);
+    roi_mask = masks{i};
 
-%% ----------------------------------------------------------
-%  SECTION 3: SPLIT SURROUNDING BINARY INTO 3 REGIONS
-% -----------------------------------------------------------
+    pts_left  = pts_left_all{t};
+    pts_right = pts_right_all{t};
 
-% Build pixel coordinate grids
-[X, Y] = meshgrid(1:w, 1:h);
+    fprintf('\nProcessing [%d/%d]: %s\n', t, num_targets, target_names{t});
 
-% For each pixel, evaluate the fitted polynomial at that row (y)
-% to get the x-boundary of each rail line
-x_left_map  = polyval(p_left,  Y);
-x_right_map = polyval(p_right, Y);
+    % --- Polynomial fit to curved rails ---
+    p_left  = polyfit(pts_left(:,2),  pts_left(:,1),  poly_degree);
+    p_right = polyfit(pts_right(:,2), pts_right(:,1), poly_degree);
 
-% Left region:   pixel x < left rail boundary
-% Right region:  pixel x > right rail boundary
-% Middle region: between both rail lines
-roi_mask = masks{img_idx};
+    y_range     = (1:h)';
+    x_left_fit  = polyval(p_left,  y_range);
+    x_right_fit = polyval(p_right, y_range);
 
-left_region   = (X < x_left_map)  & roi_mask;
-right_region  = (X > x_right_map) & roi_mask;
-middle_region = (X >= x_left_map) & (X <= x_right_map) & roi_mask;
+    % --- Region split using polynomial boundaries ---
+    [X, Y]        = meshgrid(1:w, 1:h);
+    x_left_map    = polyval(p_left,  Y);
+    x_right_map   = polyval(p_right, Y);
 
-% --- Figure: Region Split ---
-figure('Name', 'Figure 22 - Region Split on p8.jpg', ...
-    'NumberTitle', 'off', 'Position', [0, 0, 800, 600]);
+    left_region   = (X < x_left_map)  & roi_mask;
+    right_region  = (X > x_right_map) & roi_mask;
+    middle_region = (X >= x_left_map) & (X <= x_right_map) & roi_mask;
 
-region_overlay = zeros(h, w, 3);
-region_overlay(:,:,1) = double(left_region);    % red
-region_overlay(:,:,2) = double(middle_region);  % green
-region_overlay(:,:,3) = double(right_region);   % blue
+    % --- SLIC + k-means ---
+    img_roi = img;
+    img_roi(repmat(~roi_mask, [1 1 3])) = 0;
+    img_lab = rgb2lab(img_roi);
 
-imshow(region_overlay);
-title('Figure 22 — Region Split: Left=red  Middle=green  Right=blue', ...
-    'FontSize', 11);
+    [sp_labels, num_sp] = superpixels(img_lab, num_superpixels, ...
+        'Compactness', 10, 'IsInputLab', true);
 
-%% ----------------------------------------------------------
-%  SECTION 4: SLIC + K-MEANS ON ROI
-% -----------------------------------------------------------
+    sp_features = zeros(num_sp, 3);
+    for c = 1:3
+        channel = img_lab(:,:,c);
+        for s = 1:num_sp
+            px = channel(sp_labels == s);
+            sp_features(s, c) = mean(px);
+        end
+    end
 
-% Apply ROI mask to original RGB image
-img_roi = img;
-img_roi(repmat(~roi_mask, [1 1 3])) = 0;
+    cluster_idx = kmeans(sp_features, k_clusters, 'Replicates', 5);
 
-% Convert to L*a*b* for perceptually uniform clustering
-img_lab = rgb2lab(img_roi);
-
-% SLIC superpixel oversegmentation
-num_superpixels = 400;
-[sp_labels, num_sp] = superpixels(img_lab, num_superpixels, ...
-    'Compactness', 20, 'IsInputLab', true);
-
-% Compute mean L*a*b* per superpixel
-sp_features = zeros(num_sp, 3);
-for c = 1:3
-    channel = img_lab(:,:,c);
+    cluster_img = zeros(h, w);
     for s = 1:num_sp
-        px = channel(sp_labels == s);
-        sp_features(s, c) = mean(px);
+        cluster_img(sp_labels == s) = cluster_idx(s);
     end
+
+    cluster_counts = zeros(k_clusters, 1);
+    for c = 1:k_clusters
+        cluster_counts(c) = sum(cluster_img(roi_mask) == c);
+    end
+
+    [~, sorted_idx]    = sort(cluster_counts, 'descend');
+    surrounding_binary = (cluster_img == sorted_idx(2)) & roi_mask;
+    surrounding_all{t} = surrounding_binary;
+
+    % --- Apply region masks to surrounding binary ---
+    surr_left   = surrounding_binary & left_region;
+    surr_middle = surrounding_binary & middle_region;
+    surr_right  = surrounding_binary & right_region;
+
+    % --- Closing + opening per region ---
+    surr_left_ref   = imopen(imclose(surr_left,   se_region), se_region);
+    surr_middle_ref = imopen(imclose(surr_middle, se_region), se_region);
+    surr_right_ref  = imopen(imclose(surr_right,  se_region), se_region);
+
+    regions_all{t, 1} = surr_left_ref;
+    regions_all{t, 2} = surr_middle_ref;
+    regions_all{t, 3} = surr_right_ref;
+
+    % --- Euler number + decision ---
+    e_left   = bweuler(surr_left_ref);
+    e_mid    = bweuler(surr_middle_ref);
+    e_right  = bweuler(surr_right_ref);
+
+    euler_results(t, :)  = [e_left, e_mid, e_right];
+    indirect_flags(t)    = (e_left ~= 1) || (e_mid ~= 1) || (e_right ~= 1);
+
+    fprintf('  Euler: L=%d  M=%d  R=%d  →  %s\n', ...
+        e_left, e_mid, e_right, ...
+        decision_str(indirect_flags(t)));
 end
-
-% K-means clustering k=3
-k_clusters  = 3;
-cluster_idx = kmeans(sp_features, k_clusters, 'Replicates', 5);
-
-% Build pixel-level cluster image
-cluster_img = zeros(h, w);
-for s = 1:num_sp
-    cluster_img(sp_labels == s) = cluster_idx(s);
-end
-
-% Count pixels per cluster within ROI only
-cluster_counts = zeros(k_clusters, 1);
-for c = 1:k_clusters
-    cluster_counts(c) = sum(cluster_img(roi_mask) == c);
-end
-
-% Background = highest count, surrounding = second highest count
-[~, sorted_idx]     = sort(cluster_counts, 'descend');
-surrounding_cluster = sorted_idx(2);
-surrounding_binary  = (cluster_img == surrounding_cluster) & roi_mask;
-
-% --- Figure: SLIC + k-means result ---
-figure('Name', 'Figure 23 - SLIC K-means Surrounding Region', ...
-    'NumberTitle', 'off', 'Position', [0, 0, 1200, 500]);
-
-subplot(1, 3, 1);
-imshow(img_roi);
-title('ROI Image', 'FontSize', 10);
-
-subplot(1, 3, 2);
-% Show superpixel boundaries
-sp_boundary = boundarymask(sp_labels);
-imshow(imoverlay(img_roi, sp_boundary, 'cyan'));
-title(sprintf('SLIC Superpixels (N=%d)', num_superpixels), 'FontSize', 10);
-
-subplot(1, 3, 3);
-imshow(surrounding_binary);
-title('Surrounding Binary (2nd highest cluster)', 'FontSize', 10);
-
-sgtitle('Figure 23 — SLIC + K-means on p8.jpg', 'FontSize', 12, ...
-    'FontWeight', 'bold');
 
 %% ----------------------------------------------------------
-%  SECTION 5: APPLY REGIONS MASK TO SURROUNDING BINARY
+%  SECTION 3: DISPLAY RESULTS
 % -----------------------------------------------------------
 
-surr_left   = surrounding_binary & left_region;
-surr_middle = surrounding_binary & middle_region;
-surr_right  = surrounding_binary & right_region;
+cols = 5;
+rows = ceil(num_targets / cols);
 
-%% ----------------------------------------------------------
-%  SECTION 6: CLOSING + OPENING PER REGION
-% -----------------------------------------------------------
+% --- Figure: Rail polynomial fit verification ---
+figure('Name', 'Figure 21 - Rail Polynomial Fits', ...
+    'NumberTitle', 'off', 'Position', [0, 0, 1500, rows*250]);
 
-se_region = strel('square', 10);
+for t = 1:num_targets
+    if img_indices(t) == 0; continue; end
 
-surr_left_ref   = imopen(imclose(surr_left,   se_region), se_region);
-surr_middle_ref = imopen(imclose(surr_middle, se_region), se_region);
-surr_right_ref  = imopen(imclose(surr_right,  se_region), se_region);
+    h = img_sizes(t, 1);
+    p_left  = polyfit(pts_left_all{t}(:,2),  pts_left_all{t}(:,1),  poly_degree);
+    p_right = polyfit(pts_right_all{t}(:,2), pts_right_all{t}(:,1), poly_degree);
+    y_range = (1:h)';
 
-% --- Figure: Refined regions ---
-figure('Name', 'Figure 24 - Refined Regions p8.jpg', ...
-    'NumberTitle', 'off', 'Position', [0, 0, 1200, 400]);
+    subplot(rows, cols, t);
+    imshow(imgs{t}); hold on;
+    plot(pts_left_all{t}(:,1),  pts_left_all{t}(:,2),  'r.', 'MarkerSize', 12);
+    plot(pts_right_all{t}(:,1), pts_right_all{t}(:,2), 'g.', 'MarkerSize', 12);
+    plot(polyval(p_left,  y_range), y_range, 'r-', 'LineWidth', 1.5);
+    plot(polyval(p_right, y_range), y_range, 'g-', 'LineWidth', 1.5);
+    title(sprintf('[%d] %s', t, target_names{t}), ...
+        'FontSize', 7, 'Interpreter', 'none');
+    hold off;
+end
+sgtitle('Figure 21 — Rail Polynomial Fit Verification', ...
+    'FontSize', 12, 'FontWeight', 'bold');
 
-subplot(1, 3, 1);
-imshow(surr_left_ref);
-title('Left Region (refined)', 'FontSize', 10);
+% --- Figure: Surrounding binary (SLIC + k-means) ---
+figure('Name', 'Figure 22 - Surrounding Binary', ...
+    'NumberTitle', 'off', 'Position', [0, 0, 1500, rows*250]);
 
-subplot(1, 3, 2);
-imshow(surr_middle_ref);
-title('Middle Region (refined)', 'FontSize', 10);
+for t = 1:num_targets
+    if img_indices(t) == 0; continue; end
+    subplot(rows, cols, t);
+    imshow(surrounding_all{t});
+    title(sprintf('[%d] %s', t, target_names{t}), ...
+        'FontSize', 7, 'Interpreter', 'none');
+end
+sgtitle('Figure 22 — Surrounding Binary (SLIC + k-means)', ...
+    'FontSize', 12, 'FontWeight', 'bold');
 
-subplot(1, 3, 3);
-imshow(surr_right_ref);
-title('Right Region (refined)', 'FontSize', 10);
+% --- Figure: Refined regions overlay ---
+figure('Name', 'Figure 23 - Refined Regions', ...
+    'NumberTitle', 'off', 'Position', [0, 0, 1500, rows*250]);
 
-sgtitle('Figure 24 — Refined Surrounding Regions on p8.jpg', ...
+for t = 1:num_targets
+    if img_indices(t) == 0; continue; end
+    h = img_sizes(t, 1);
+    w = img_sizes(t, 2);
+
+    overlay = zeros(h, w, 3);
+    overlay(:,:,1) = double(regions_all{t, 1});  % left  — red
+    overlay(:,:,2) = double(regions_all{t, 2});  % middle — green
+    overlay(:,:,3) = double(regions_all{t, 3});  % right  — blue
+
+    subplot(rows, cols, t);
+    imshow(overlay);
+    title(sprintf('[%d] %s', t, target_names{t}), ...
+        'FontSize', 7, 'Interpreter', 'none');
+end
+sgtitle('Figure 23 — Refined Regions: Left=red  Middle=green  Right=blue', ...
+    'FontSize', 12, 'FontWeight', 'bold');
+
+% --- Figure: Final detection decision ---
+figure('Name', 'Figure 24 - Indirect Obstacle Detection Results', ...
+    'NumberTitle', 'off', 'Position', [0, 0, 1500, rows*250]);
+
+for t = 1:num_targets
+    if img_indices(t) == 0; continue; end
+
+    subplot(rows, cols, t);
+    imshow(imgs{t}); hold on;
+
+    h = img_sizes(t, 1);
+    p_left  = polyfit(pts_left_all{t}(:,2),  pts_left_all{t}(:,1),  poly_degree);
+    p_right = polyfit(pts_right_all{t}(:,2), pts_right_all{t}(:,1), poly_degree);
+    y_range = (1:h)';
+    plot(polyval(p_left,  y_range), y_range, 'y-', 'LineWidth', 1.5);
+    plot(polyval(p_right, y_range), y_range, 'y-', 'LineWidth', 1.5);
+
+    if indirect_flags(t)
+        dec_col = [1 0 0];
+        dec_str = 'INDIRECT OBSTACLE';
+    else
+        dec_col = [0 0.8 0];
+        dec_str = 'CLEAR';
+    end
+
+    title(sprintf('[%d] E=[%d,%d,%d]\n%s', t, ...
+        euler_results(t,1), euler_results(t,2), euler_results(t,3), dec_str), ...
+        'FontSize', 7, 'Color', dec_col);
+    hold off;
+end
+sgtitle('Figure 24 — Indirect Obstacle Detection Results', ...
     'FontSize', 12, 'FontWeight', 'bold');
 
 %% ----------------------------------------------------------
-%  SECTION 7: EULER NUMBER + DECISION
+%  SECTION 4: SUMMARY TABLE
 % -----------------------------------------------------------
 
-e_left   = bweuler(surr_left_ref);
-e_middle = bweuler(surr_middle_ref);
-e_right  = bweuler(surr_right_ref);
-
-indirect_detected = (e_left ~= 1) || (e_middle ~= 1) || (e_right ~= 1);
-
-fprintf('\n--- Indirect Obstacle Detection: p8.jpg ---\n');
-fprintf('Euler Left:   %d\n', e_left);
-fprintf('Euler Middle: %d\n', e_middle);
-fprintf('Euler Right:  %d\n', e_right);
-fprintf('Decision:     %s\n\n', ...
-    string(indirect_detected) + " — " + ...
-    ternary_str(indirect_detected, 'INDIRECT OBSTACLE DETECTED', 'CLEAR'));
-
-% --- Figure: Final annotated result ---
-figure('Name', 'Figure 25 - Final Detection Result p8.jpg', ...
-    'NumberTitle', 'off', 'Position', [0, 0, 900, 600]);
-
-imshow(img); hold on;
-
-% Draw fitted rail lines
-plot(x_left,  y_range, 'y-',  'LineWidth', 2);
-plot(x_right, y_range, 'y-',  'LineWidth', 2);
-
-if indirect_detected
-    dec_str = 'INDIRECT OBSTACLE DETECTED';
-    dec_col = 'red';
-else
-    dec_str = 'CLEAR';
-    dec_col = 'green';
+fprintf('\n%-25s | E_left | E_mid | E_right | Decision\n', 'Image');
+fprintf('%s\n', repmat('-', 1, 70));
+for t = 1:num_targets
+    if img_indices(t) == 0; continue; end
+    fprintf('%-25s | %6d | %5d | %7d | %s\n', ...
+        target_names{t}, ...
+        euler_results(t,1), euler_results(t,2), euler_results(t,3), ...
+        decision_str(indirect_flags(t)));
 end
-
-title(sprintf('Figure 25 — p8.jpg | E=[%d,%d,%d] | %s', ...
-    e_left, e_middle, e_right, dec_str), ...
-    'FontSize', 11, 'Color', dec_col);
-hold off;
 
 %% ----------------------------------------------------------
 %  HELPER FUNCTION
 % -----------------------------------------------------------
-function s = ternary_str(cond, a, b)
-    if cond; s = a; else; s = b; end
+function s = decision_str(flag)
+    if flag
+        s = 'INDIRECT OBSTACLE DETECTED';
+    else
+        s = 'CLEAR';
+    end
 end

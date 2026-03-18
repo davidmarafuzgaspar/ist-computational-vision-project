@@ -45,9 +45,9 @@ for i = 1:N
     %   y > 0.4*h   → below the upper 40% of the image
     %   x < 0.5*w   → left half of the image
     %   y > h - 2*x → diagonal from p1=(0,h) to p2=(0.3*w, 0.4*h)
-    mask_A = (Y > 0.4 * h) & ...
+    mask_A = (Y > 0.5 * h) & ...
              (X < 0.5 * w + seam_padding) & ...
-             (Y > h - 2 * X);
+             (Y > h - 1.7 * X);
 
     % --- Subregion B: mirror of A around vertical bisector ---
     mask_B = fliplr(mask_A);
