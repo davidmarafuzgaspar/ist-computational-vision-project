@@ -14,10 +14,10 @@ function plot_superpixel_outliers(results, images, viz_indices)
     idx_list = results.clear_idx(viz_indices);
     n = numel(idx_list);
     if n == 0, return; end
-    cols = min(n, 4);
+    cols = min(n, 3);
     rows = ceil(n / cols);
 
-    figure('Name', 'Superpixel Outliers', 'NumberTitle', 'off', 'Position', [0, 0, 1600, rows*350]);
+    figure('Name', 'Superpixel Outliers', 'NumberTitle', 'off', 'Position', [100, 100, 1200, 800]);
     for k = 1:n
         i = idx_list(k);
         img = images{i};
@@ -51,10 +51,10 @@ function plot_superpixel_outliers(results, images, viz_indices)
         [~, fname, ext] = fileparts(results.filenames{i});
         r_s = results.anomaly_ratios(i, 1);
         r_m = results.anomaly_ratios(i, 2);
-        title(sprintf('[%d] %s%s\nSides=%.3f Mid=%.3f', i, fname, ext, r_s, r_m), 'FontSize', 8, 'Interpreter', 'none');
+        title(sprintf('%s%s\nSides=%.3f Mid=%.3f', fname, ext, r_s, r_m), 'FontSize', 10, 'Interpreter', 'none');
         hold off;
     end
     sp = results.sp_params;
     sgtitle(sprintf('Superpixel Outliers (red=sides, green=middle)\nSP=%d IQR_mul=%.1f', sp.num_superpixels, sp.iqr_multiplier), ...
-        'FontSize', 12, 'FontWeight', 'bold');
+        'FontSize', 14, 'FontWeight', 'bold');
 end

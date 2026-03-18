@@ -13,10 +13,10 @@ function plot_three_way_regions(results, images, viz_indices)
     idx_list = results.clear_idx(viz_indices);
     n = numel(idx_list);
     if n == 0, return; end
-    cols = min(n, 4);
+    cols = min(n, 3);
     rows = ceil(n / cols);
 
-    figure('Name', '3-way Region Split', 'NumberTitle', 'off', 'Position', [0, 0, 1600, rows*350]);
+    figure('Name', '3-way Region Split', 'NumberTitle', 'off', 'Position', [100, 100, 1200, 800]);
     for k = 1:n
         i = idx_list(k);
         img = images{i};
@@ -38,10 +38,10 @@ function plot_three_way_regions(results, images, viz_indices)
         h_ov = imshow(overlay);
         set(h_ov, 'AlphaData', 0.5 * double(left_r | mid_r | right_r));
         [~, fname, ext] = fileparts(results.filenames{i});
-        title(sprintf('[%d] %s%s', i, fname, ext), 'FontSize', 8, 'Interpreter', 'none');
+        title(sprintf('%s%s', fname, ext), 'FontSize', 10, 'Interpreter', 'none');
         hold off;
     end
     rp = results.roi_params;
     sgtitle(sprintf('3-way Region Split (red=left, green=middle, blue=right; %.0f%% width)', rp.pct_side*100), ...
-        'FontSize', 12, 'FontWeight', 'bold');
+        'FontSize', 14, 'FontWeight', 'bold');
 end

@@ -1,6 +1,6 @@
-function [left_region, mid_region, right_region] = step2_three_way_regions(h, w, p_left, p_right, ...
+function [left_region, mid_region, right_region] = aux_three_way_regions(h, w, p_left, p_right, ...
     ROI_TOP_Y, rail_padding, pct_side)
-% STEP2_THREE_WAY_REGIONS  Define left, middle, and right regions from rail fits.
+% Define left, middle, and right regions from rail fits.
 %
 % Inputs:
 %   h, w - Image dimensions

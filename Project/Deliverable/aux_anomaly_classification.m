@@ -1,5 +1,5 @@
-function final_status = step4_anomaly_classification(predicted_status, anomaly_ratios, area_thresh)
-% STEP4_ANOMALY_CLASSIFICATION  Reclassify based on anomaly ratios.
+function final_status = aux_anomaly_classification(predicted_status, anomaly_ratios, area_thresh)
+% Reclassify based on anomaly ratios.
 %
 % Inputs:
 %   predicted_status - Nx1 string ("Clear"/"Obstructed") from first stage

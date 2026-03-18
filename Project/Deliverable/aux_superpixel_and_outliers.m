@@ -1,7 +1,7 @@
 function [anom_left, anom_mid, anom_right, sp_labels, r_sides, r_mid] = ...
-    step3_superpixel_and_outliers(img, left_region, mid_region, right_region, ...
+    aux_superpixel_and_outliers(img, left_region, mid_region, right_region, ...
     num_superpixels, sp_compactness, iqr_multiplier)
-% STEP3_SUPERPIXEL_AND_OUTLIERS  SLIC segmentation + Tukey IQR outlier detection.
+% SLIC segmentation + Tukey IQR outlier detection.
 %
 % Inputs:
 %   img - RGB image

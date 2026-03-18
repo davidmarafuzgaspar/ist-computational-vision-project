@@ -1024,16 +1024,23 @@ if ~isempty(clear_idx)
         end
     end
 
-    % Final summary table
-    img_names = cell(N, 1);
-    for i = 1:N
+    % Final summary table (only images initially classified as Clear)
+    nClear = numel(clear_idx);
+    img_names_clear = cell(nClear, 1);
+    for k = 1:nClear
+        i = clear_idx(k);
         [~, fname, ext] = fileparts(filenames{i});
-        img_names{i} = [fname ext];
+        img_names_clear{k} = [fname ext];
     end
-
-    final_summary = table((1:N)', img_names, predicted_status, ...
-        anomaly_ratios(:,1), anomaly_ratios(:,2), final_status, ...
-        'VariableNames', {'Image', 'Filename', 'InitialClass', 'SidesRatio', 'MiddleRatio', 'FinalClass'});
+% Ensure all table variables are column vectors with same number of rows
+final_summary = table(...
+    clear_idx(:), ...
+    img_names_clear, ...
+    predicted_status(clear_idx(:)), ...
+    anomaly_ratios(clear_idx(:), 1), ...
+    anomaly_ratios(clear_idx(:), 2), ...
+    final_status(clear_idx(:)), ...
+    'VariableNames', {'Image', 'Filename', 'InitialClass', 'SidesRatio', 'MiddleRatio', 'FinalClass'});
 
     fprintf('\n========== FINAL CLASSIFICATION SUMMARY ==========\n');
     fprintf('Rule: Obstructed if Sides > %.2f OR Middle > %.2f\n', area_thresh_final, area_thresh_final);

@@ -1,6 +1,6 @@
 function [left_pts, right_pts, left_segments, right_segments, x_left_fit, x_right_fit, y_fit, p_left, p_right] = ...
-    step1_rail_regression(bw_clean, roi_mask, n_strips, theta_min, theta_max, x_thresh)
-% STEP1_RAIL_REGRESSION  Fit degree-2 polynomials to Hough-detected rail lines.
+    aux_rail_regression(bw_clean, roi_mask, n_strips, theta_min, theta_max, x_thresh)
+%  Fit degree-2 polynomials to Hough-detected rail lines.
 %
 % Inputs:
 %   bw_clean   - Binary image (Otsu DoG + ROI + bwareaopen)
