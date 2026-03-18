@@ -1,12 +1,14 @@
 % AUX_CHECKPOINT  Load and preprocess data for rail regression pipeline.
 % No plots or tables. Produces variables needed for aux_rail_regression.
 %
+%clear; clc; close all;
+
 % Usage: run this script, then call aux_rail_regression for each image in clear_idx.
 %
 % Output variables:
 %   images, images_otsu_dog_roi_clean, filenames, labels, predicted_status,
 %   clear_idx, ROI_BL_X, ROI_BR_X, ROI_TL_X, ROI_TR_X, ROI_TOP_Y,
-%   n_strips, theta_min, theta_max, x_thresh
+%   n_strips, theta_min, theta_max, x_thresh, strel_radius, se
 
 % =========================
 % LOAD DATA
@@ -109,6 +111,8 @@ ROI_TL_X = 0.30;
 ROI_TR_X = 0.70;
 ROI_TOP_Y = 0.4;
 min_pixels = 100;
+strel_radius = 3;
+se = strel('disk', strel_radius);
 
 % =========================
 % CLEANED Otsu(DoG) WITH ROI
@@ -128,6 +132,13 @@ end
 % =========================
 % HOUGH METRICS PER STRIP (for predicted_status)
 % =========================
+
+% ROI for Hough strips (matches aux_checkpoint_safe)
+ROI_BL_X = 0.05;
+ROI_BR_X = 0.95;
+ROI_TL_X = 0.3;
+ROI_TR_X = 0.7;
+ROI_TOP_Y = 0.45;
 
 theta_min = -50;
 theta_max = 50;
@@ -185,10 +196,17 @@ for i = 1:N
                 end
             end
             lengths_use = arrayfun(@(l) norm(l.point1 - l.point2), selected_lines);
-            mean_len = mean(lengths_use);
-            max_len = max(lengths_use);
-            coverage = mean(arrayfun(@(l) abs(l.point1(2) - l.point2(2)) / (y_end - y_start), selected_lines));
-            num_lines_use = numel(selected_lines);
+            if isempty(lengths_use)
+                mean_len = 0;
+                max_len = 0;
+                coverage = 0;
+                num_lines_use = 0;
+            else
+                mean_len = mean(lengths_use);
+                max_len = max(lengths_use);
+                coverage = mean(arrayfun(@(l) abs(l.point1(2) - l.point2(2)) / (y_end - y_start), selected_lines));
+                num_lines_use = numel(selected_lines);
+            end
         else
             mean_len = 0;
             max_len = 0;
