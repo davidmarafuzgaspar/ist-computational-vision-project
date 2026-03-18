@@ -132,6 +132,41 @@ for i = 1:N
 end
 sgtitle('Linhas Otimizadas Suaves Segmentadas (Baixo para Cima, Sem Inventar Pontos)','FontSize',12,'FontWeight','bold');
 
+
+
+%% ----------------------------------------------------------
+% SAVE DETECTED LINES
+% ----------------------------------------------------------
+
+% left_lines e right_lines: struct com uma célula por imagem
+% Cada célula contém Nx2 [X,Y] de pixels da spline contínua
+left_lines = cell(N,1);
+right_lines = cell(N,1);
+
+for i = 1:N
+    % Para cada subplot/image
+    % Substitua pelas suas variáveis de spline detectadas
+    % Aqui usamos left_segments e right_segments
+    if exist('left_segments','var')
+        % Concatenar todos os segmentos em uma única matriz
+        left_lines{i} = vertcat(left_segments{:});
+    else
+        left_lines{i} = [];
+    end
+    if exist('right_segments','var')
+        right_lines{i} = vertcat(right_segments{:});
+    else
+        right_lines{i} = [];
+    end
+end
+
+% Criar pasta ./Output se não existir
+if ~exist('./Output','dir'), mkdir('./Output'); end
+
+% Salvar
+save('./Output/optimized_lines.mat', 'left_lines', 'right_lines');
+fprintf('Optimized lines saved to ./Output/optimized_lines.mat\n');
+
 %% Função auxiliar
 function plot_segment_spline(pts)
     % pts: Nx2 [X,Y]
