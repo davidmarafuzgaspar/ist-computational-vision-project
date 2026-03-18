@@ -1,7 +1,7 @@
 % AUX_CHECKPOINT  Load and preprocess data for rail regression pipeline.
 % No plots or tables. Produces variables needed for aux_rail_regression.
 %
-clear; clc; close all;
+%clear; clc; close all;
 
 % Usage: run this script, then call aux_rail_regression for each image in clear_idx.
 %
