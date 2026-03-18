@@ -46,7 +46,7 @@ end
 
 CLAHE_TILES = [8 8];
 CLAHE_CLIPLIMIT = 0.02;
-SIGMA = 1.5;
+SIGMA = 1;
 
 SIGMA1 = 1;
 SIGMA2 = 2;
