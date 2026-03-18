@@ -42,6 +42,5 @@ function plot_three_way_regions(results, images, viz_indices)
         hold off;
     end
     rp = results.roi_params;
-    sgtitle(sprintf('3-way Region Split (red=left, green=middle, blue=right; %.0f%% width)', rp.pct_side*100), ...
-        'FontSize', 14, 'FontWeight', 'bold');
+    sgtitle('Figure X: 3-way Region Split', 'FontSize', 14, 'FontWeight', 'bold');
 end
