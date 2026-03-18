@@ -48,5 +48,5 @@ function plot_rail_regression(results, images, viz_indices)
         title(sprintf('%s%s', fname, ext), 'FontSize', 10, 'Interpreter', 'none');
         hold off;
     end
-    sgtitle('Rail Polynomial Fit (degree 2)', 'FontSize', 14, 'FontWeight', 'bold');
+    sgtitle('Figure X: Rail Polynomial Fit (degree 2)', 'FontSize', 14, 'FontWeight', 'bold');
 end

@@ -55,6 +55,5 @@ function plot_superpixel_outliers(results, images, viz_indices)
         hold off;
     end
     sp = results.sp_params;
-    sgtitle(sprintf('Superpixel Outliers (red=sides, green=middle)\nSP=%d IQR_mul=%.1f', sp.num_superpixels, sp.iqr_multiplier), ...
-        'FontSize', 14, 'FontWeight', 'bold');
+    sgtitle('Figure X: Superpixel Outliers', 'FontSize', 14, 'FontWeight', 'bold');
 end
