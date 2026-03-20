@@ -3,7 +3,7 @@ clear, clc, close all
 
 %% 2.a) Create datastore and define training and testing sets
 % Create datastore
-datastore=imageDatastore('DigitDataset', ...
+datastore=imageDatastore('./Data/DigitDataset', ...
     'IncludeSubfolders',true,'LabelSource','foldernames');
 
 % Show sample images of each class
@@ -47,34 +47,44 @@ layers = [
 
 %% 2.c) Training options
 % Define the training options for your network
-% options =
+options = trainingOptions("adam", ...
+    "InitialLearnRate", 0.0001, ...
+    "MaxEpochs", 100, ...
+    "Verbose", true, ...
+    "Plots", "training-progress");
 
 
 %% Net training, classification of test data and result analysis
 % Train net
-% net = 
-% 
-% % Classification
-% YPred = 
-% 
-% % Labels to compare
-% YTest = dataTest.Labels;
-% 
-% % Accuracy
-% accuracy = 
-% fprintf('Testing accuracy: %.1f%% \n', accuracy)
-% 
-% % Confusion matrix
-% 
-% title(['Testing accuracy: ', num2str(accuracy),'%'])
-% 
-% % Random check of images
-% perm = randperm(2000,12);
-% figure
-% for i = 1:12
-%     num = perm(i);
-%     subplot(3,4,i);
-%     imshow(dataTest.Files{num});
-%     title(append('Predicted label: ', string(YPred(num))))
-% end
+net = trainNetwork(dataTrain, layers, options);
+
+% Classification
+YPred = classify(net, dataTest);
+
+% Labels to compare
+YTest = dataTest.Labels;
+ 
+% Accuracy
+accuracy = sum(YPred == YTest) / numel(YTest) * 100;
+fprintf('Testing accuracy: %.1f%% \n', accuracy)
+
+% Confusion matrix
+title(['Testing accuracy: ', num2str(accuracy),'%'])
+
+% Random check of images
+perm = randperm(2000,12);
+figure
+for i = 1:12
+     num = perm(i);
+     subplot(3,4,i);
+     imshow(dataTest.Files{num});
+     title(append('Predicted label: ', string(YPred(num))))
+end
+
+%% Confusion matrix
+figure;
+cm = confusionchart(YTest, YPred);
+cm.Title = 'Confusion Matrix';
+cm.RowSummary = 'row-normalized';
+cm.ColumnSummary = 'column-normalized';
 
