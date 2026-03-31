@@ -1,20 +1,38 @@
-function img = aux_annotate(img, bboxes_people, bboxes_vehicles)
-    % AUX_ANNOTATE_THERMAL Draws bounding boxes for People and Vehicles
-    %
-    % Inputs:
-    %   img             - The raw thermal image matrix
-    %   bboxes_people   - [x, y, w, h] matrix for People
-    %   bboxes_vehicles - [x, y, w, h] matrix for Vehicles
+function img = aux_annotate(img, bboxes, labels)
+    % AUX_ANNOTATE Safely draws boxes for People and Vehicles
     
-    % Draw 'People' in Green
-    if ~isempty(bboxes_people)
-        img = insertObjectAnnotation(img, 'rectangle', bboxes_people, 'People', ...
+    % --- STEP 1: Force Bounding Boxes to Double Matrix ---
+    if istable(bboxes)
+        bboxes = table2array(bboxes);
+    end
+    if iscell(bboxes)
+        bboxes = bboxes{1};
+    end
+    bboxes = double(bboxes); % Final conversion to numeric
+    
+    % --- STEP 2: Force Labels to String Array ---
+    if istable(labels)
+        labels = table2array(labels);
+    end
+    if iscell(labels)
+        labels = labels{1};
+    end
+    labels = string(labels); % Final conversion to strings
+    
+    % --- STEP 3: Separate and Draw ---
+    % People (Green)
+    idxP = (labels == "People");
+    pBoxes = bboxes(idxP, :);
+    if ~isempty(pBoxes)
+        img = insertObjectAnnotation(img, 'rectangle', pBoxes, 'People', ...
             'Color', 'green', 'LineWidth', 3, 'FontSize', 14);
     end
     
-    % Draw 'Vehicles' in Red
-    if ~isempty(bboxes_vehicles)
-        img = insertObjectAnnotation(img, 'rectangle', bboxes_vehicles, 'Vehicle', ...
+    % Vehicles (Red)
+    idxV = (labels == "Vehicles");
+    vBoxes = bboxes(idxV, :);
+    if ~isempty(vBoxes)
+        img = insertObjectAnnotation(img, 'rectangle', vBoxes, 'Vehicle', ...
             'Color', 'red', 'LineWidth', 3, 'FontSize', 14);
     end
 end
