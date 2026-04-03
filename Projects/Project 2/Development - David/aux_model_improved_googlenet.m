@@ -1,5 +1,5 @@
 %% =========================================================
-%  IMPROVED OBJECT DETECTION - YOLOv2 + GoogLeNet
+%  IMPROVED OBJECT DETECTION - YOLOv2 + GoogleNet
 %  Data Augmentation + Better Training | 2 Classes
 %  Intelligent Vision Systems - Topic A3
 % ==========================================================
@@ -19,7 +19,7 @@ testAnnFile  = fullfile(testImgDir,  'coco.json');
 classNames        = {'person', 'vehicle'};
 vehicleCategories = ["car", "motor", "bus", "train", "truck", "other vehicle"];
 
-inputSize  = [416 416 3];   % ← back to SqueezeNet size
+inputSize  = [224 224 3];   % GoogleNet size
 numAnchors = 7;             % more anchors = better box diversity
 numEpochs  = 40;            % more epochs
 batchSize  = 16;            % larger batch = more stable gradients
@@ -47,12 +47,11 @@ blds = boxLabelDatastore(trainData(:, 2:3));
 [anchors, meanIoU] = estimateAnchorBoxes(blds, numAnchors);
 fprintf('   Mean IoU: %.4f\n', meanIoU);
 
-%% ── 4. BUILD YOLOV2 + SQUEEZENET (IMPROVED) ──────────────
+%% ── 4. BUILD YOLOV2 + GOOGLENET (IMPROVED) ──────────────
+fprintf('\n>> Building YOLOv2 with GoogLeNet backbone...\n');
 
-fprintf('\n>> Building YOLOv2 with SqueezeNet backbone (improved settings)...\n');
-
-baseNet      = squeezenet;
-featureLayer = 'fire9-concat';
+baseNet = googlenet; 
+featureLayer = 'inception_4c-output'; 
 
 lgraph = yolov2Layers(inputSize, numel(classNames), anchors, ...
                       baseNet, featureLayer);
