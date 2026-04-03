@@ -1,6 +1,6 @@
 %% =========================================================
-%  BASELINE OBJECT DETECTION - Custom CNN from Scratch
-%  YOLOv2 with custom backbone — FLIR ADAS Thermal
+%  BASELINE OBJECT DETECTION - YOLOv2 + SqueezeNet
+%  Transfer Learning | 2 Classes: Person + Vehicle
 %  Intelligent Vision Systems - Topic A3
 % ==========================================================
 
@@ -8,185 +8,206 @@ clc; clear; close all;
 
 %% ── 1. CONFIGURATION ─────────────────────────────────────
 
-datasetRoot  = fullfile('Data');
-trainImgDir  = fullfile(datasetRoot, 'images_thermal_train', 'data');
-valImgDir    = fullfile(datasetRoot, 'images_thermal_val',   'data');
-testImgDir   = fullfile(datasetRoot, 'video_thermal_test',   'data');  % <-- real test set
+trainImgDir  = './Data/images_thermal_train_subset';
+valImgDir    = './Data/images_thermal_val_subset';
+testImgDir   = './Data/video_thermal_test_subset';
 
-trainAnnFile = fullfile(datasetRoot, 'images_thermal_train', 'coco.json');
-valAnnFile   = fullfile(datasetRoot, 'images_thermal_val',   'coco.json');
-testAnnFile  = fullfile(datasetRoot, 'video_thermal_test',   'coco.json');  % <-- real test annotations
+trainAnnFile = fullfile(trainImgDir, 'coco.json');
+valAnnFile   = fullfile(valImgDir,   'coco.json');
+testAnnFile  = fullfile(testImgDir,  'coco.json');
 
-classNames = {'person', 'car', 'motorcycle', 'bus', 'train', 'truck', 'other vehicle'};
-inputSize  = [256 256 3];   % smaller input = faster training from scratch
+classNames = {'person', 'vehicle'};
+
+% Vehicle categories to merge into single 'vehicle' class
+vehicleCategories = ["car", "motor", "bus", "train", "truck", "other vehicle"];
+
+inputSize  = [416 416 3];
 numAnchors = 5;
-numEpochs  = 40;
-batchSize  = 16;
+numEpochs  = 30;
+batchSize  = 8;
 
-%% ── 2. PARSE COCO ANNOTATIONS ────────────────────────────
+% Create output folder if it doesn't exist
+if ~exist('./Output', 'dir'); mkdir('./Output'); end
+
+%% ── 2. PARSE ANNOTATIONS ─────────────────────────────────
 
 fprintf('>> Loading annotations...\n');
-trainData = parseCOCO(trainAnnFile, trainImgDir, classNames);
-valData   = parseCOCO(valAnnFile,   valImgDir,   classNames);
-testData  = parseCOCO(testAnnFile,  testImgDir,  classNames);  % <-- real test set, no splitting needed
+trainData = parseCOCO(trainAnnFile, trainImgDir, vehicleCategories);
+valData   = parseCOCO(valAnnFile,   valImgDir,   vehicleCategories);
+testData  = parseCOCO(testAnnFile,  testImgDir,  vehicleCategories);
 
 fprintf('   Train : %d | Val : %d | Test : %d\n', ...
         height(trainData), height(valData), height(testData));
 
+% Verify class distribution
 allLabels = vertcat(trainData.labels{:});
-disp(categories(allLabels));
+disp('Class distribution in training set:');
+disp(countcats(allLabels));
 
 %% ── 3. ESTIMATE ANCHOR BOXES ─────────────────────────────
 
 fprintf('\n>> Estimating anchor boxes...\n');
-
-% Convert training table to a boxLabelDatastore
-blds = boxLabelDatastore(trainData(:, 2:3));  % columns: boxes + labels
-
+blds = boxLabelDatastore(trainData(:, 2:3));
 [anchors, meanIoU] = estimateAnchorBoxes(blds, numAnchors);
 fprintf('   Mean IoU: %.4f\n', meanIoU);
 
-%% ── 4. BUILD CUSTOM CNN BACKBONE FROM SCRATCH ────────────
-%
-%   Architecture:
-%   Input → [Conv → BN → ReLU → MaxPool] x4 → [Conv → BN → ReLU] x2
-%
-%   This is intentionally simple for a baseline.
-%   Each conv block progressively increases filters: 32→64→128→256→512
+%% ── 4. BUILD YOLOV2 + SQUEEZENET ─────────────────────────
 
-fprintf('Number of classes: %d\n', numel(classNames));   % should print 7
+fprintf('\n>> Building YOLOv2 with SqueezeNet backbone...\n');
 
-fprintf('\n>> Building custom CNN backbone from scratch...\n');
+baseNet      = squeezenet;
+featureLayer = 'fire9-concat';
 
-layers = [
-    % ── Input ──────────────────────────────────────────────
-    imageInputLayer(inputSize, 'Name', 'input', ...
-                    'Normalization', 'rescale-zero-one')
-
-    % ── Block 1: 32 filters ────────────────────────────────
-    convolution2dLayer(3, 32, 'Padding','same', 'Name','conv1')
-    batchNormalizationLayer('Name','bn1')
-    reluLayer('Name','relu1')
-    maxPooling2dLayer(2, 'Stride',2, 'Name','pool1')   % 128x128
-
-    % ── Block 2: 64 filters ────────────────────────────────
-    convolution2dLayer(3, 64, 'Padding','same', 'Name','conv2')
-    batchNormalizationLayer('Name','bn2')
-    reluLayer('Name','relu2')
-    maxPooling2dLayer(2, 'Stride',2, 'Name','pool2')   % 64x64
-
-    % ── Block 3: 128 filters ───────────────────────────────
-    convolution2dLayer(3, 128, 'Padding','same', 'Name','conv3')
-    batchNormalizationLayer('Name','bn3')
-    reluLayer('Name','relu3')
-    maxPooling2dLayer(2, 'Stride',2, 'Name','pool3')   % 32x32
-
-    % ── Block 4: 256 filters ───────────────────────────────
-    convolution2dLayer(3, 256, 'Padding','same', 'Name','conv4')
-    batchNormalizationLayer('Name','bn4')
-    reluLayer('Name','relu4')
-    maxPooling2dLayer(2, 'Stride',2, 'Name','pool4')   % 16x16
-
-    % ── Block 5: 512 filters (no pooling — feature map) ────
-    convolution2dLayer(3, 512, 'Padding','same', 'Name','conv5')
-    batchNormalizationLayer('Name','bn5')
-    reluLayer('Name','relu5')
-
-    % ── Block 6: 512 filters (final feature layer) ─────────
-    convolution2dLayer(3, 512, 'Padding','same', 'Name','conv6')
-    batchNormalizationLayer('Name','bn6')
-    reluLayer('Name','relu6')   % <-- YOLOv2 will attach here
-];
-
-% Convert to layer graph
-lgraph = layerGraph(layers);
-
-% Attach YOLOv2 detection head on top of the last ReLU
 lgraph = yolov2Layers(inputSize, numel(classNames), anchors, ...
-                      lgraph, 'relu6');
+                      baseNet, featureLayer);
 
-% Inspect the full network
-%analyzeNetwork(lgraph);
+%% ── 5. CONVERT TO DATASTORES ─────────────────────────────
 
-%% ── 5. TRAINING OPTIONS ──────────────────────────────────
+fprintf('\n>> Converting to datastores...\n');
 
-options = trainingOptions('adam', ...   % Adam works better training from scratch
-    'MiniBatchSize',        batchSize,  ...
-    'MaxEpochs',            numEpochs,  ...
-    'InitialLearnRate',     1e-3,       ...
-    'LearnRateSchedule',    'piecewise',...
-    'LearnRateDropFactor',  0.5,        ...
-    'LearnRateDropPeriod',  15,         ...
-    'L2Regularization',     5e-4,       ...
-    'ValidationData',       valData,    ...
-    'ValidationFrequency',  50,         ...
+% Transform: grayscale → 3-channel, keep boxes and labels
+grayToRGB = @(data) {repmat(data{1}, [1 1 3]), data{2}, data{3}};
+
+trainDS = combine(imageDatastore(trainData.imageFilename), ...
+                  boxLabelDatastore(trainData(:, 2:3)));
+trainDS = transform(trainDS, grayToRGB);
+
+testDS  = combine(imageDatastore(testData.imageFilename), ...
+                  boxLabelDatastore(testData(:, 2:3)));
+testDS  = transform(testDS, grayToRGB);
+
+%% ── 6. TRAINING OPTIONS ──────────────────────────────────
+
+options = trainingOptions('sgdm', ...
+    'MiniBatchSize',        batchSize,   ...
+    'MaxEpochs',            numEpochs,   ...
+    'InitialLearnRate',     1e-3,        ...
+    'LearnRateSchedule',    'piecewise', ...
+    'LearnRateDropFactor',  0.5,         ...
+    'LearnRateDropPeriod',  10,          ...
+    'Momentum',             0.9,         ...
+    'L2Regularization',     5e-4,        ...
     'Shuffle',              'every-epoch', ...
-    'Verbose',              true,       ...
-    'Plots',                'training-progress', ...
+    'Verbose',              true,        ...
+    'Plots',                'none',      ...  % no plots on Azure
     'ExecutionEnvironment', 'auto');
 
-%% ── 6. TRAIN ─────────────────────────────────────────────
+%% ── 7. TRAIN ─────────────────────────────────────────────
 
-fprintf('\n>> Training from scratch...\n');
-[detector, trainInfo] = trainYOLOv2ObjectDetector(trainData, lgraph, options);
-save('detector_baseline_scratch.mat', 'detector', 'trainInfo');
-fprintf('   Model saved.\n');
+fprintf('\n>> Training baseline (YOLOv2 + SqueezeNet)...\n');
+[detector, trainInfo] = trainYOLOv2ObjectDetector(trainDS, lgraph, options);
+save('./Output/detector_baseline.mat', 'detector', 'trainInfo');
+fprintf('   Model saved to Output/detector_baseline.mat\n');
 
-%% ── 7. EVALUATE ──────────────────────────────────────────
+%% ── 8. EVALUATE ──────────────────────────────────────────
 
 fprintf('\n>> Evaluating on test set...\n');
-results = detect(detector, testData, 'MiniBatchSize',4, 'Threshold',0.3);
-[ap, recall, precision] = evaluateDetectionPrecision(results, testData(:,2:3));
+results = detect(detector, testDS, 'MiniBatchSize', 4, 'Threshold', 0.3);
+[ap, recall, precision] = evaluateDetectionPrecision(results, testDS);
 mAP = mean(ap);
 
-fprintf('\n========== RESULTS ==========\n');
+% Results table
+T_results = table(classNames', ap, ...
+    'VariableNames', {'Class', 'AP'});
+disp('Table: Average Precision per Class');
+disp(T_results);
+fprintf('mAP = %.4f\n', mAP);
+
+% Save AP results to CSV
+writetable(T_results, './Output/ap_results.csv');
+fprintf('   AP results saved to Output/ap_results.csv\n');
+
+%% ── 9. SAVE PRECISION-RECALL DATA ────────────────────────
+
+fprintf('\n>> Saving Precision-Recall data...\n');
 for i = 1:numel(classNames)
-    fprintf('  %-10s  AP = %.4f\n', classNames{i}, ap(i));
+    T_pr = table(recall{i}, precision{i}, ...
+        'VariableNames', {'Recall', 'Precision'});
+    fname = sprintf('./Output/pr_curve_%s.csv', classNames{i});
+    writetable(T_pr, fname);
+    fprintf('   Saved: %s\n', fname);
 end
-fprintf('  ----------------------------\n');
-fprintf('  mAP = %.4f\n', mAP);
-fprintf('==============================\n');
 
-%% ── 8. PRECISION-RECALL CURVES ───────────────────────────
+%% ── 10. SAVE TRAINING INFO ───────────────────────────────
 
-figure('Name','Precision-Recall Curves');
-colors = lines(numel(classNames));
-for i = 1:numel(classNames)
-    plot(recall{i}, precision{i}, 'LineWidth',2, 'Color',colors(i,:));
-    hold on;
+fprintf('\n>> Saving training history...\n');
+
+fields = fieldnames(trainInfo);
+disp('Available trainInfo fields:');
+disp(fields);
+
+% Save each numeric field as its own CSV
+for i = 1:numel(fields)
+    val = trainInfo.(fields{i});
+    if isnumeric(val) && ~isempty(val)
+        T_field = table(val(:), 'VariableNames', {fields{i}});
+        fname   = sprintf('./Output/training_%s.csv', fields{i});
+        writetable(T_field, fname);
+        fprintf('   Saved: %s (%d values)\n', fname, numel(val));
+    end
 end
-legend(classNames, 'Location','southwest');
-xlabel('Recall'); ylabel('Precision');
-title(sprintf('Precision-Recall — Baseline from Scratch | mAP = %.4f', mAP));
-grid on;
-saveas(gcf, 'pr_curve_baseline_scratch.png');
 
-%% ── 9. VISUALISE DETECTIONS ──────────────────────────────
+fprintf('   Training history saved.\n');
 
-figure('Name','Detections');
-numShow = min(6, height(testData));
+%% ── 11. SAVE RESULTS SUMMARY ─────────────────────────────
+
+fprintf('\n>> Saving results summary...\n');
+
+summary.mAP        = mAP;
+summary.AP_person  = ap(strcmp(classNames, 'person'));
+summary.AP_vehicle = ap(strcmp(classNames, 'vehicle'));
+summary.numEpochs  = numEpochs;
+summary.batchSize  = batchSize;
+summary.backbone   = 'squeezenet';
+summary.inputSize  = inputSize;
+summary.numAnchors = numAnchors;
+
+fid = fopen('./Output/results_summary.json', 'w');
+fprintf(fid, '%s', jsonencode(summary));
+fclose(fid);
+fprintf('   Summary saved to Output/results_summary.json\n');
+
+%% ── 12. SAVE SAMPLE DETECTION DATA ──────────────────────
+
+fprintf('\n>> Saving sample detection results...\n');
+numShow    = min(6, height(testData));
+detResults = struct();
+
 for i = 1:numShow
     img = imread(testData.imageFilename{i});
-    if size(img,3) == 1; img = repmat(img,[1 1 3]); end
-
-    [bboxes, scores, labels] = detect(detector, img, 'Threshold',0.4);
-    if ~isempty(bboxes)
-        annLabels = strcat(cellstr(labels), {' '}, ...
-            arrayfun(@(s) sprintf('%.2f',s), scores,'UniformOutput',false));
-        img = insertObjectAnnotation(img,'rectangle',bboxes,annLabels,'LineWidth',2);
+    if size(img, 3) == 1
+        img = repmat(img, [1 1 3]);
     end
-    subplot(2,3,i); imshow(img); title(['Test ' num2str(i)]);
+    [bboxes, scores, labels] = detect(detector, img, 'Threshold', 0.4);
+
+    detResults(i).imageFile = testData.imageFilename{i};
+    if ~isempty(bboxes)
+        detResults(i).bboxes = bboxes;
+        detResults(i).scores = scores;
+        detResults(i).labels = cellstr(labels);
+    else
+        detResults(i).bboxes = [];
+        detResults(i).scores = [];
+        detResults(i).labels = {};
+    end
 end
-sgtitle('Baseline (Scratch) Detections');
-saveas(gcf, 'detections_baseline_scratch.png');
+
+fid = fopen('./Output/sample_detections.json', 'w');
+fprintf(fid, '%s', jsonencode(detResults));
+fclose(fid);
+fprintf('   Sample detections saved to Output/sample_detections.json\n');
 
 fprintf('\n>> Done!\n');
 
 
 %% =========================================================
 %  LOCAL FUNCTION — Parse COCO JSON → MATLAB table
+%  Merges vehicle subcategories into single 'vehicle' class
 % ==========================================================
-function T = parseCOCO(jsonPath, imgDir, classNames)
+function T = parseCOCO(jsonPath, imgDir, vehicleCategories)
+
+    classNames = {'person', 'vehicle'};
+
     raw  = fileread(jsonPath);
     coco = jsondecode(raw);
 
@@ -201,17 +222,19 @@ function T = parseCOCO(jsonPath, imgDir, classNames)
         imgMap(double(img.id)) = img;
     end
 
-    % ── category_id → index within classNames ──────────────
-    catMap = containers.Map('KeyType','double','ValueType','int32');
+    % ── category_id → 'person' or 'vehicle' ───────────────
+    catMap = containers.Map('KeyType','double','ValueType','char');
     for i = 1:numel(coco.categories)
         if iscell(coco.categories)
             cat = coco.categories{i};
         else
             cat = coco.categories(i);
         end
-        idx = find(strcmpi(classNames, lower(cat.name)));
-        if ~isempty(idx)
-            catMap(double(cat.id)) = idx;
+        name = lower(cat.name);
+        if strcmp(name, 'person')
+            catMap(double(cat.id)) = 'person';
+        elseif any(strcmp(name, vehicleCategories))
+            catMap(double(cat.id)) = 'vehicle';
         end
     end
 
@@ -228,25 +251,25 @@ function T = parseCOCO(jsonPath, imgDir, classNames)
 
         if ~isKey(catMap, double(ann.category_id)); continue; end
 
-        b   = ann.bbox;
-        box = [b(1)+1, b(2)+1, max(b(3),1), max(b(4),1)];  % 1-based, min size 1
-        lbl = categorical({classNames{catMap(double(ann.category_id))}}, classNames);
-        id  = double(ann.image_id);
+        b      = ann.bbox;
+        box    = [b(1)+1, b(2)+1, max(b(3),1), max(b(4),1)];
+        lbl    = categorical({catMap(double(ann.category_id))}, classNames);
+        id     = double(ann.image_id);
 
         if isKey(boxMap, id)
             boxMap(id)   = [boxMap(id);   box];
-            labelMap(id) = [labelMap(id); lbl'];  % column vector
+            labelMap(id) = [labelMap(id); lbl'];
         else
             boxMap(id)   = box;
-            labelMap(id) = lbl';                  % column vector
+            labelMap(id) = lbl';
         end
     end
 
-    % ── build table ────────────────────────────────────────
+    % ── build and validate table ───────────────────────────
     ids       = keys(boxMap);
-    filePaths = cell(numel(ids),1);
-    allBoxes  = cell(numel(ids),1);
-    allLabels = cell(numel(ids),1);
+    filePaths = cell(numel(ids), 1);
+    allBoxes  = cell(numel(ids), 1);
+    allLabels = cell(numel(ids), 1);
 
     for i = 1:numel(ids)
         id           = ids{i};
@@ -257,14 +280,12 @@ function T = parseCOCO(jsonPath, imgDir, classNames)
     end
 
     T = table(filePaths, allBoxes, allLabels, ...
-              'VariableNames',{'imageFilename','boxes','labels'});
+              'VariableNames', {'imageFilename','boxes','labels'});
 
-    % ── remove invalid rows (box count ≠ label count) ──────
+    % Remove invalid rows
     validRows = true(height(T), 1);
     for i = 1:height(T)
-        nBoxes  = size(T.boxes{i}, 1);
-        nLabels = numel(T.labels{i});
-        if nBoxes ~= nLabels
+        if size(T.boxes{i}, 1) ~= numel(T.labels{i})
             validRows(i) = false;
         end
     end
