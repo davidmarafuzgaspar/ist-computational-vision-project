@@ -1,16 +1,13 @@
-%% =========================================================
-%  MODEL EVALUATION - RGB & THERMAL TEST SETS
-% ==========================================================
-clc; clear; close all;
+%% MODEL EVALUATION - RGB & THERMAL TEST SETS
 
-%% ── 1. SETUP PATHS & LOAD MODEL ──────────────────────────
+%% 1. SETUP PATHS & LOAD MODEL 
 modelPath = './Output/improved_squeezenet/detector_improved.mat';
 if ~exist(modelPath, 'file')
-    error('Trained model not found at %s. Please train the model first.', modelaPath);
+    error('Trained model not found at %s. Please train the model first.', modelPath);
 end
 load(modelPath); % Loads 'detector' and 'trainInfo'
 
-% Define your test directories
+% Test directories
 testSets = struct(...
     'Name', {'Thermal', 'RGB'}, ...
     'ImgDir', {'./Data/video_thermal_test', './Data/video_rgb_test'}, ...
@@ -21,7 +18,11 @@ classNames = {'person', 'vehicle'};
 vehicleCategories = ["car", "motor", "bus", "train", "truck", "other vehicle"];
 inputSize = detector.TrainingImageSize;
 
-%% ── 2. LOOP THROUGH EACH MODALITY ────────────────────────
+% Preallocate storage for APs
+allAP = zeros(numel(classNames), numel(testSets));
+meanAP = zeros(1, numel(testSets));
+
+%% LOOP THROUGH EACH MODALITY
 for s = 1:numel(testSets)
     fprintf('\n>> Evaluating modality: %s\n', testSets(s).Name);
     
@@ -30,7 +31,6 @@ for s = 1:numel(testSets)
         continue;
     end
     
-    % Parse annotations
     testData = parseCOCO(testSets(s).AnnFile, testSets(s).ImgDir, vehicleCategories);
     
     % Convert to datastore
@@ -46,27 +46,43 @@ for s = 1:numel(testSets)
     [ap, recall, precision] = evaluateDetectionPrecision(results, testDS);
     mAP = mean(ap);
     
+    % Save APs
+    allAP(:, s) = ap;
+    meanAP(s)   = mAP;
+    
     % Display Results
     T_res = table(classNames', ap, 'VariableNames', {'Class', 'AP'});
     fprintf('   Results for %s:\n', testSets(s).Name);
     disp(T_res);
     fprintf('   Mean AP: %.4f\n', mAP);
-    
-    % Plot Precision-Recall Curves
-    figure('Name', ['PR Curve - ' testSets(s).Name]);
-    for i = 1:numel(classNames)
-        subplot(1, 2, i);
-        plot(recall{i}, precision{i}, 'LineWidth', 2);
-        xlabel('Recall'); ylabel('Precision');
-        grid on; title(sprintf('%s: %s (AP: %.2f)', testSets(s).Name, classNames{i}, ap(i)));
-    end
 end
+
+%% SAVE CROSS-MODALITY CSV 
+outputDir = './Output/rgb_vs_thermal';
+if ~exist(outputDir, 'dir')
+    mkdir(outputDir);
+end
+
+Class       = classNames';
+Thermal_AP  = allAP(:, strcmp({testSets.Name}, 'Thermal'));
+RGB_AP      = allAP(:, strcmp({testSets.Name}, 'RGB'));
+Mean_AP     = [meanAP(strcmp({testSets.Name}, 'Thermal')), meanAP(strcmp({testSets.Name}, 'RGB'))];
+
+% Add Mean row to table
+Class = [Class; "Mean"];
+Thermal_AP = [Thermal_AP; meanAP(strcmp({testSets.Name}, 'Thermal'))];
+RGB_AP     = [RGB_AP; meanAP(strcmp({testSets.Name}, 'RGB'))];
+
+comparisonTable = table(Class, Thermal_AP, RGB_AP);
+
+csvFile = fullfile(outputDir, 'comparison.csv');
+writetable(comparisonTable, csvFile);
+fprintf('\n>> Cross-modality comparison CSV saved to:\n%s\n', csvFile);
 
 fprintf('\n>> Cross-modality testing complete.\n');
 
-%% =========================================================
-%  LOCAL FUNCTION — Parse COCO JSON → MATLAB table
-% ==========================================================
+%% LOCAL FUNCTIONS
+
 function T = parseCOCO(jsonPath, imgDir, vehicleCategories)
 
     classNames = {'person', 'vehicle'};
