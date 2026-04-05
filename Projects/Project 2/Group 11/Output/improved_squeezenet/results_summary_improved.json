@@ -1,1 +1,0 @@
-{"mAP":0.08251005567071619,"AP_person":0.045206981657919587,"AP_vehicle":0.11981312968351279,"numEpochs":40,"batchSize":16,"backbone":"googlenet","optimizer":"adam","inputSize":[416,416,3],"numAnchors":7,"augmentation":true}
