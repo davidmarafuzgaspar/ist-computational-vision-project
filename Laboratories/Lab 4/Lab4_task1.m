@@ -1,13 +1,12 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico
-% Computational Vision - Lab 4
+% Computational Vision - Lab 4 - Task 1
 %
 % Authors:
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
-%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%% Task 1
+
 img = imread('tire.tif');
 
 %% Sharpened versions

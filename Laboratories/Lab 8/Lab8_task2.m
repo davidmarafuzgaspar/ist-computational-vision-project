@@ -1,7 +1,12 @@
-clear, clc, close all
-%% TASK 2: Digit Classification
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 8 - Task 2
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% 2.a) Create datastore and define training and testing sets
 % Create datastore
 datastore=imageDatastore('./Data/DigitDataset', ...
     'IncludeSubfolders',true,'LabelSource','foldernames');
@@ -19,7 +24,6 @@ dataTrain = 0.8;
 dataTest = 0.2;
 [dataTrain, dataTest] = splitEachLabel(datastore, dataTrain, dataTest, 'randomize');
 
-%% 2.b) Deep Learning Neural Network
 % Network Architecture
 layers = [
             imageInputLayer([28 28 1])
@@ -45,7 +49,6 @@ layers = [
             classificationLayer];
 
 
-%% 2.c) Training options
 % Define the training options for your network
 options = trainingOptions("adam", ...
     "InitialLearnRate", 0.0001, ...
@@ -54,7 +57,6 @@ options = trainingOptions("adam", ...
     "Plots", "training-progress");
 
 
-%% Net training, classification of test data and result analysis
 % Train net
 net = trainNetwork(dataTrain, layers, options);
 

@@ -1,4 +1,11 @@
-clear, clc, close all
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 7 - Task 4
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 % List of all possible region properties to test
 allProperties = ["Area", "Perimeter", "Eccentricity", "Solidity", "Extent", "EulerNumber", "EquivDiameter"];

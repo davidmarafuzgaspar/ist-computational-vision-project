@@ -1,14 +1,11 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico 
-% Computational Vision - Lab 3
+% Computational Vision - Lab 3 - Task 1
 % 
 % Authors:
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
-%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-%% Task 1
 
 % 1. Load the image and convert to Double (as required by the task)
 img_uint8 = imread('./Data/cells.png');

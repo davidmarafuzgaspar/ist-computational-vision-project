@@ -1,6 +1,11 @@
-clear; clc; close all
-
-%% TASK 2: Measure Planar Objects
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 9 - Task 2
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 % Adjust number of images if needed
 numImages = 9;

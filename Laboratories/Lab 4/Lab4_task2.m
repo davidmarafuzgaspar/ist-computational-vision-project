@@ -1,14 +1,12 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico
-% Computational Vision - Lab 4
+% Computational Vision - Lab 4 - Task 2
 %
 % Authors:
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
-%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% Task 2
 img2 = imread('./Data/pillsetc.png');
 img2_gray = rgb2gray(img2);
 

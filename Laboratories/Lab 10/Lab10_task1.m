@@ -1,8 +1,12 @@
-clear, clc, close all
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 10 - Task 1
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% TASK 1: Measure Distance to Objects
-
-%% Image Loading and Stereo Camera Calibration
 % Load images from location
 leftImages = imageDatastore('./Data/real_left');
 rightImages = imageDatastore('./Data/real_right');

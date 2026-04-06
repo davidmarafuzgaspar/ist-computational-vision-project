@@ -1,14 +1,12 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico 
-% Computational Vision - Lab 1
+% Computational Vision - Lab 1 - Task 3
 % 
 % Authors:
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
-%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% Task 3
 % Load the bottlecaps image and convert to grayscale
 img = imread('./Data/bottlecaps.jpg');
 img_gray = rgb2gray(img);

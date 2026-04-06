@@ -1,8 +1,12 @@
-clear, clc, close all
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 10 - Task 2
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% TASK 2: Estimation of Extrinsic Parameters
-
-%% Image Loading and Individual Camera Calibration
 % Load images from location
 leftImages = imageDatastore('./Data/real_left');
 rightImages = imageDatastore('./Data/real_right');

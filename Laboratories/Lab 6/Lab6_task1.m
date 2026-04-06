@@ -1,8 +1,14 @@
-%% Task 1 - Extraction of Region Properties
-% Load, binarize, and extract region properties from geometrical shape images
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 6 - Task 1
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Step 1: Load an image from the dataset
-img = imread('./Data/datasetImages/rho_build(1).jpg');  % Replace with your actual image filename
+img = imread('./Data/datasetImages/rho_build(1).jpg'); 
 
 %% Step 2: Convert to grayscale if the image is RGB
 if size(img, 3) == 3
@@ -13,7 +19,7 @@ end
 
 %% Step 3: Binarize the image using thresholding
 % Ensures a true binary image
-threshold = graythresh(img_gray);          % Otsu's method to compute threshold
+threshold = graythresh(img_gray);    
 img_binary = imbinarize(img_gray, threshold);
 
 %% Step 4: Complement the binary image

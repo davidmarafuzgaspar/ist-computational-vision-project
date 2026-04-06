@@ -1,4 +1,11 @@
-clear, clc, close all
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 7 - Task 3
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %% Perimeter vs Area
 properties1 = ["Perimeter", "Area"];
@@ -8,7 +15,6 @@ properties1 = ["Perimeter", "Area"];
 properties2 = ["Circularity", "Eccentricity"];
 [propsTable2, XTrain2, YTrain2, XTest2, YTest2] = lab7_buildTable(properties2);
 
-%% TASK 3: Build NN Model with Perimeter vs Area
 % 1. Build the model
 % 'LayerSizes' defines the architecture: [10] is one layer, [10 10] is two.
 nnModel = fitcnet(XTrain1, YTrain1, ...
@@ -28,7 +34,6 @@ fprintf('NN (Perimeter vs Area) Accuracy: %.2f%%\n', accuracyNN * 100);
 figure;
 confusionchart(YTest1, predictionsNN, 'Title', 'Confusion Matrix: Neural Network');
 
-%% TASK 3: Build NN Model with Circularity vs Area
 % 1. Build the model
 % 'LayerSizes' defines the architecture: [10] is one layer, [10 10] is two.
 nnModel = fitcnet(XTrain2, YTrain2, ...

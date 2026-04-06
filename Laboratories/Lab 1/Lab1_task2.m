@@ -1,14 +1,12 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico 
-% Computational Vision - Lab 1
+% Computational Vision - Lab 1 - Task 2
 % 
 % Authors:
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
-%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% Task 2
 % Load the original image
 img = imread('./Data/bottlecaps.jpg');
 

@@ -1,14 +1,11 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico 
-% Computational Vision - Lab 3
+% Computational Vision - Lab 3 - Task 2
 % 
-% Authors:
+% Authors:  
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
-%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-%% Task 2
 
 % 1. Load the Image
 img_data = imread('./Data/cells.png');

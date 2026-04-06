@@ -1,14 +1,11 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico 
-% Computational Vision - Lab 1
+% Computational Vision - Lab 2 - Task 3
 % 
 % Authors:
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
-%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-%% Task 3
 
 % 1. Load the Noisy Images
 img_gn = imread('./Data/car_gaussian.jpg');

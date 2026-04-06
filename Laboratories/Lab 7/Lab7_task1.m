@@ -1,6 +1,12 @@
-clear, clc, close all
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 7 - Task 1
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% TASK 1: Perimeter vs Area
 properties1 = ["Perimeter", "Area"];
 [propsTable1, XTrain1, YTrain1, XTest1, YTest1] = lab7_buildTable(properties1);
 

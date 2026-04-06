@@ -1,14 +1,12 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Instituto Superior Tecnico
-% Computational Vision - Lab 4
+% Computational Vision - Lab 4 - Task 4
 %
 % Authors:
 % David Marafuz Gaspar - 106541
 % Pedro Gaspar Mónico - 106626
-%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% Task 4
 img3 = imread('./Data/blobs.png');
 img3_bw = edge(img3, 'Canny');
 

@@ -1,6 +1,12 @@
-clear, clc, close all
-%% TASK 1: Pre-Trained Network
-%% 1.a) Load and analyze network
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 8 - Task 1
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 % Load GoogLeNet
 net = googlenet;
 
@@ -13,7 +19,6 @@ inputSize = net.Layers(1).InputSize;
 % Output size (number of possible classifications) -> "Classes" property of the last layer% Output size = number of possible classifications
 outputClasses = net.Layers(end).Classes;
 
-%% 1.b) Load and classify an image
 % Load image
 image = imread("./Data/computer.jpg");
 
@@ -30,7 +35,6 @@ image_resized = imresize(image, [targetHeight targetWidth]);
 imshow(image), title(append('Best class is: ', string(pred)))
 
 
-%% 1.c) Analyze results
 % Define minimum score to analyze and create logical array
 threshold = 0.01;
 highscores = scores > threshold;

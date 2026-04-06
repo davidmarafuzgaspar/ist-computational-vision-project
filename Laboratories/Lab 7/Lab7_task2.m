@@ -1,6 +1,12 @@
-clear, clc, close all
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% Instituto Superior Tecnico
+% Computational Vision - Lab 7 - Task 2
+%
+% Authors:
+% David Marafuz Gaspar - 106541
+% Pedro Gaspar Mónico - 106626
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-%% Task 2: Circularity vs Eccentricity
 properties2 = ["Circularity", "Eccentricity"];
 [propsTable2, XTrain2, YTrain2, XTest2, YTest2] = lab7_buildTable(properties2);
 
