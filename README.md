@@ -4,8 +4,8 @@ This repository contains the coursework and projects for the Instituto Superior 
 
 ## Authors
 
-- David Marafuz Gaspar — 106541
-- Pedro Gaspar Mónico — 106626
+- David Marafuz Gaspar - 106541
+- Pedro Gaspar Mónico - 106626
 
 ## Project Overview
 
